@@ -1,0 +1,31 @@
+---
+title: Stacking
+description: Open an overlay from another overlay.
+---
+
+Overlays stack. Open one from inside another without setting up a portal.
+
+<StackingDemo />
+
+Open **Settings**, then **Delete Atlas…** to put a confirm dialog on top.
+
+## Example
+
+```tsx
+export const settingsDialog = createOverlay((props) => (
+  <Dialog {...props} title="Settings">
+    <button
+      type="button"
+      onClick={() =>
+        confirmDeleteDialog.open({
+          organizationName: "Atlas",
+        })
+      }
+    >
+      Delete Atlas…
+    </button>
+  </Dialog>
+));
+```
+
+Each overlay is managed on its own. Closing the top one leaves the one underneath open.

@@ -1,31 +1,57 @@
 ---
-title: Hello World
-description: Your favourite docs framework.
-icon: Rocket
+title: Getting Started
+description: Install overlay-manager and open your first dialog.
 ---
 
-Hey there! Fumadocs is the docs framework that also works on Tanstack Start!
+`@overlay-manager/react` lets you register a dialog once, then open it from a click handler, a route effect, or another overlay.
 
-## Heading
+## Installation
 
-Hello World!
-
-<Cards>
-  <Card title="Learn more about Tanstack Start" href="https://tanstack.com/start" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
-
-### CodeBlock
-
-```ts
-console.log("Hello World");
+```npm
+npm i @overlay-manager/react
 ```
 
-#### Table
+## Add the provider
 
-| Head                            | Description                         |
-| ------------------------------- | ----------------------------------- |
-| `hello`                         | Hello World                         |
-| very **important**              | Hey                                 |
-| _Surprisingly_                  | Fumadocs                            |
-| very long text that looks weird | hello world hello world hello world |
+Render `OverlayProvider` once near the root of your app.
+
+```tsx
+import { OverlayProvider } from "@overlay-manager/react";
+
+export function App() {
+  return (
+    <OverlayProvider>
+      <Page />
+    </OverlayProvider>
+  );
+}
+```
+
+## Create an overlay
+
+Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it.
+
+```tsx
+import { createOverlay, type OverlayProps } from "@overlay-manager/react";
+import { Dialog } from "./dialog";
+
+export const settingsDialog = createOverlay((props: OverlayProps) => (
+  <Dialog {...props} title="Settings">
+    <button type="button" onClick={() => settingsDialog.close()}>
+      Close
+    </button>
+  </Dialog>
+));
+```
+
+## Open it
+
+Call `open()` from anywhere. No local `useState`.
+
+```tsx
+settingsDialog.open();
+```
+
+<WelcomeDemo />
+
+Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.

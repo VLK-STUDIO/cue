@@ -1,0 +1,28 @@
+---
+title: Typed props
+description: Pass data into an overlay when you open it.
+---
+
+Give `createOverlay` a props generic. TypeScript then requires those props on `open()`.
+
+<TypedPropsDemo />
+
+## Example
+
+```tsx
+export const confirmDeleteDialog = createOverlay<{
+  organizationName: string;
+}>((props) => (
+  <Dialog {...props} title={`Delete ${props.organizationName}?`}>
+    <button type="button" onClick={() => confirmDeleteDialog.close()}>
+      Cancel
+    </button>
+  </Dialog>
+));
+
+confirmDeleteDialog.open({
+  organizationName: "Helios",
+});
+```
+
+`OverlayProps` (`open`, `onOpenChange`) are always injected. Your generic only describes the extra fields.

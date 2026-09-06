@@ -1,7 +1,9 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { OverlayProvider } from "@overlay-manager/react";
 import * as React from "react";
 import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
+import { appName } from "@/lib/shared";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -14,7 +16,11 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Fumadocs on TanStack Start",
+        title: appName,
+      },
+      {
+        name: "description",
+        content: "Register a dialog once. Open it from anywhere.",
       },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -30,7 +36,9 @@ function RootComponent() {
       </head>
       <body className="flex flex-col min-h-screen">
         <RootProvider>
-          <Outlet />
+          <OverlayProvider>
+            <Outlet />
+          </OverlayProvider>
         </RootProvider>
         <Scripts />
       </body>

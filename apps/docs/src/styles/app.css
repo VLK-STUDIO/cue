@@ -2,6 +2,10 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
+:root {
+  --om-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -9,4 +13,213 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Landing: Vaul-inspired centered hero */
+.om-landing {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem 6rem;
+  text-align: center;
+}
+
+.om-landing-title {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--color-fd-foreground);
+}
+
+.om-landing-tagline {
+  margin: 0.85rem 0 0;
+  max-width: 28rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--color-fd-muted-foreground);
+}
+
+.om-landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.om-landing-docs {
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--color-fd-foreground);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  transition: color 150ms var(--om-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .om-landing-docs:hover {
+    color: var(--color-fd-muted-foreground);
+  }
+}
+
+/* Shared controls */
+.om-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid var(--color-fd-border);
+  background: var(--color-fd-background);
+  color: var(--color-fd-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform 140ms var(--om-ease-out),
+    background 150ms var(--om-ease-out),
+    border-color 150ms var(--om-ease-out),
+    color 150ms var(--om-ease-out);
+}
+
+.om-button:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .om-button:hover {
+    background: var(--color-fd-accent);
+    border-color: var(--color-fd-border);
+  }
+
+  .om-button-primary:hover {
+    background: color-mix(in oklab, var(--color-fd-foreground) 85%, transparent);
+    border-color: transparent;
+    color: var(--color-fd-background);
+  }
+
+  .om-button-danger:hover {
+    background: #912018;
+    border-color: #912018;
+    color: #fff;
+  }
+}
+
+.om-button-primary {
+  background: var(--color-fd-foreground);
+  border-color: var(--color-fd-foreground);
+  color: var(--color-fd-background);
+}
+
+.om-button-danger {
+  background: #b42318;
+  border-color: #b42318;
+  color: #fff;
+}
+
+/* Demo preview pane */
+.om-demo-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  padding: 2rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--color-fd-card);
+  border: 1px solid var(--color-fd-border);
+}
+
+/* Dialog */
+.om-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgb(0 0 0 / 0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--om-ease-out),
+    background 200ms var(--om-ease-out);
+}
+
+.om-dialog-backdrop.is-open {
+  background: rgb(0 0 0 / 0.45);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.om-dialog-panel {
+  width: min(28rem, 100%);
+  padding: 1.35rem 1.4rem 1.2rem;
+  background: var(--color-fd-popover);
+  color: var(--color-fd-popover-foreground);
+  border: 1px solid var(--color-fd-border);
+  border-radius: 1rem;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.18);
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transition:
+    transform 220ms var(--om-ease-out),
+    opacity 220ms var(--om-ease-out);
+}
+
+.om-dialog-backdrop.is-open .om-dialog-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.om-dialog-title {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.om-dialog-body {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.55;
+  color: var(--color-fd-muted-foreground);
+}
+
+.om-dialog-body code {
+  font-size: 0.85em;
+}
+
+.om-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .om-button,
+  .om-landing-docs,
+  .om-dialog-backdrop,
+  .om-dialog-panel {
+    transition: none;
+  }
+
+  .om-button:active {
+    transform: none;
+  }
+
+  .om-dialog-panel {
+    opacity: 1;
+    transform: none;
+  }
 }

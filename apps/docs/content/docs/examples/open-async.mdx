@@ -1,0 +1,21 @@
+---
+title: openAsync
+description: Wait for an overlay to close with a Promise.
+---
+
+`openAsync` opens the overlay and returns a `Promise<boolean>` that resolves `false` when it closes.
+
+<OpenAsyncDemo />
+
+## Example
+
+```tsx
+const confirmed = await asyncConfirmDialog.openAsync({
+  message: "Archive this project?",
+});
+
+// false when the overlay closes
+console.log(confirmed);
+```
+
+Use this for confirm flows in async handlers when you do not want local state.

@@ -1,0 +1,25 @@
+---
+title: Default
+description: Register a dialog and open it with no extra props.
+---
+
+Create an overlay, then call `open()`.
+
+<DefaultDemo />
+
+## Anatomy
+
+```tsx
+import { createOverlay } from "@overlay-manager/react";
+import { Dialog } from "./dialog";
+
+export const settingsDialog = createOverlay((props) => (
+  <Dialog {...props} title="Settings">
+    <button type="button" onClick={() => settingsDialog.close()}>
+      Close
+    </button>
+  </Dialog>
+));
+```
+
+`createOverlay` returns `{ open, close, openAsync, component }`. Keep the handle in a module and call it from event handlers, effects, or other overlays.

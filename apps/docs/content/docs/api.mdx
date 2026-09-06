@@ -1,0 +1,62 @@
+---
+title: API
+description: createOverlay, OverlayProvider, and OverlayProps.
+---
+
+## `createOverlay(component)`
+
+Registers a component with the overlay manager and returns a handle.
+
+```tsx
+const dialog = createOverlay((props) => <Dialog {...props} />);
+```
+
+| Method | Description |
+| --- | --- |
+| `open(props?)` | Show the overlay. Extra props are required when you pass a props generic. |
+| `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
+| `openAsync(props?)` | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes. |
+| `component` | The component you passed in. |
+
+### Typed props
+
+Pass a props generic when the overlay needs data at open time:
+
+```tsx
+export const confirmDeleteDialog = createOverlay<{
+  organizationName: string;
+}>((props) => (
+  <Dialog {...props} title={`Delete ${props.organizationName}?`} />
+));
+
+confirmDeleteDialog.open({
+  organizationName: "Atlas",
+});
+```
+
+## `OverlayProvider`
+
+Renders children plus every currently visible overlay. Mount it once near the root.
+
+```tsx
+import { OverlayProvider } from "@overlay-manager/react";
+
+<OverlayProvider>
+  <App />
+</OverlayProvider>
+```
+
+## `OverlayProps`
+
+```tsx
+type OverlayProps = {
+  open: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+};
+```
+
+Spread these onto your dialog primitive so the manager stays in control.
+
+## `OverlayManager`
+
+The singleton store used by `createOverlay` and `OverlayProvider`. You rarely call this yourself.

@@ -23,6 +23,9 @@ importers:
 
   apps/docs:
     dependencies:
+      '@overlay-manager/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@tanstack/react-router':
         specifier: 1.170.32
         version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

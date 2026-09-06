@@ -28,5 +28,12 @@ export default defineConfig({
     alias: {
       tslib: "tslib/tslib.es6.js",
     },
+    dedupe: ["react", "react-dom"],
+  },
+  optimizeDeps: {
+    include: ["@overlay-manager/react"],
+  },
+  ssr: {
+    noExternal: ["@overlay-manager/react"],
   },
 });

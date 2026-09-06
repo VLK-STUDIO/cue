@@ -24,6 +24,18 @@ export const Route = createFileRoute("/docs/$")({
     await docs.getPage(data.path)?.preload();
     return data;
   },
+  head: ({ loaderData }) => ({
+    meta: loaderData
+      ? [
+          {
+            title: `${loaderData.title} | overlay-manager`,
+          },
+          ...(loaderData.description
+            ? [{ name: "description", content: loaderData.description }]
+            : []),
+        ]
+      : undefined,
+  }),
 });
 
 const serverLoader = createServerFn({
@@ -36,6 +48,8 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
+      title: page.data.title as string,
+      description: page.data.description as string | undefined,
       markdownUrl: encodeMarkdownUrl(page.slugs, page.locale),
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
@@ -56,7 +70,7 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/apps/docs/content/docs/${path}`}
         />
       </div>
       <DocsBody>
