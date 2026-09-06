@@ -13,6 +13,9 @@
     "lint": {
       "dependsOn": ["transit"]
     },
+    "format": {
+      "dependsOn": ["transit"]
+    },
     "check-types": {
       "dependsOn": ["transit", "^build"]
     },

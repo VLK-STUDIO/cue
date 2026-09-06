@@ -1,6 +1,6 @@
 # overlay-manager
 
-Turborepo for the `@overlay-manager` packages — an imperative overlay API extracted from [uni-cagliari](https://github.com).
+Turborepo for the `@overlay-manager` packages — an imperative React overlay API.
 
 ## Packages
 

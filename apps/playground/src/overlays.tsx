@@ -3,7 +3,9 @@ import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props) => (
   <Dialog {...props} title="Settings">
-    <p>No extra props. Opened with <code>settingsDialog.open()</code>.</p>
+    <p>
+      No extra props. Opened with <code>settingsDialog.open()</code>.
+    </p>
     <div className="dialog-actions">
       <button type="button" onClick={() => settingsDialog.close()}>
         Close
@@ -32,11 +34,7 @@ export const confirmDeleteDialog = createOverlay<{
       <button type="button" onClick={() => confirmDeleteDialog.close()}>
         Cancel
       </button>
-      <button
-        type="button"
-        className="danger"
-        onClick={() => confirmDeleteDialog.close()}
-      >
+      <button type="button" className="danger" onClick={() => confirmDeleteDialog.close()}>
         Delete
       </button>
     </div>

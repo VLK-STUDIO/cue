@@ -2,12 +2,19 @@
   "name": "@overlay-manager/react",
   "version": "0.1.0",
   "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
+  "keywords": [
+    "dialog",
+    "imperative",
+    "modal",
+    "overlay",
+    "react"
+  ],
   "license": "MIT",
-  "type": "module",
-  "sideEffects": false,
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -15,39 +22,36 @@
     }
   },
   "publishConfig": {
-    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
       }
     },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "lint": "oxlint",
+    "format": "oxfmt --check",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
     "prepublishOnly": "tsc"
-  },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
     "typescript": "7.0.2",
     "vitest": "^4.0.10"
   },
-  "keywords": [
-    "react",
-    "overlay",
-    "dialog",
-    "modal",
-    "imperative"
-  ]
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
 }
