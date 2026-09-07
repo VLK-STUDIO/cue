@@ -1,5 +1,5 @@
 {
-  "name": "overlay-manager",
+  "name": "cue",
   "private": true,
   "license": "MIT",
   "scripts": {

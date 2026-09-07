@@ -1,5 +1,5 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { OverlayProvider } from "@overlay-manager/react";
+import { OverlayProvider } from "@vlkoss/cue";
 import * as React from "react";
 import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";

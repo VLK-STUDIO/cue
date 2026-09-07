@@ -10,7 +10,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@overlay-manager/react": "workspace:*",
+    "@vlkoss/cue": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

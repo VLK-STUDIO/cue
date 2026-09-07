@@ -28,7 +28,7 @@ export const Route = createFileRoute("/docs/$")({
     meta: loaderData
       ? [
           {
-            title: `${loaderData.title} | overlay-manager`,
+            title: `${loaderData.title} | cue`,
           },
           ...(loaderData.description
             ? [{ name: "description", content: loaderData.description }]

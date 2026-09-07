@@ -1,4 +1,4 @@
-import type { OverlayProps } from "@overlay-manager/react";
+import type { OverlayProps } from "@vlkoss/cue";
 import type { ReactNode } from "react";
 
 type DialogProps = OverlayProps & {

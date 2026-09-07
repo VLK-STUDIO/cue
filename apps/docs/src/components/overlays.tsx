@@ -1,4 +1,4 @@
-import { createOverlay } from "@overlay-manager/react";
+import { createOverlay } from "@vlkoss/cue";
 import { Dialog } from "./dialog";
 
 export const welcomeDialog = createOverlay((props) => (

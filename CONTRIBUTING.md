@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is a pnpm + Turborepo monorepo for `@overlay-manager/react`. The root [README.md](./README.md) is for people *using* the package. This file is for people *changing* it.
+This repo is a pnpm + Turborepo monorepo for `@vlkoss/cue`. The root [README.md](./README.md) is for people *using* the package. This file is for people *changing* it.
 
 ## Setup
 
@@ -15,7 +15,7 @@ pnpm install
 
 | Path | Role |
 | --- | --- |
-| `packages/react` | `@overlay-manager/react` library |
+| `packages/react` | `@vlkoss/cue` library |
 | `packages/typescript-config` | Shared TypeScript config |
 | `apps/playground` | Vite app that exercises the library |
 | `apps/docs` | Fumadocs site (landing + docs + live demos) |
@@ -39,7 +39,7 @@ pnpm format:fix   # write formatting
 Filter a single package:
 
 ```sh
-pnpm --filter @overlay-manager/react test
+pnpm --filter @vlkoss/cue test
 pnpm --filter docs dev
 pnpm --filter playground dev
 ```
@@ -49,19 +49,19 @@ pnpm --filter playground dev
 Source is TypeScript under `packages/react/src`. Workspace installs resolve that source. `pnpm publish` swaps the entry to `dist/` via `publishConfig`.
 
 ```sh
-pnpm --filter @overlay-manager/react build
-pnpm --filter @overlay-manager/react test
+pnpm --filter @vlkoss/cue build
+pnpm --filter @vlkoss/cue test
 ```
 
 Publish only after a clean build:
 
 ```sh
-pnpm --filter @overlay-manager/react publish
+pnpm --filter @vlkoss/cue publish
 ```
 
 ## Docs site
 
-Content is MDX in `apps/docs/content/docs`. Live demos use `@overlay-manager/react` from the workspace. Sidebar order is controlled by `meta.json` files (Fumadocs page tree).
+Content is MDX in `apps/docs/content/docs`. Live demos use `@vlkoss/cue` from the workspace. Sidebar order is controlled by `meta.json` files (Fumadocs page tree).
 
 ```sh
 pnpm --filter docs dev

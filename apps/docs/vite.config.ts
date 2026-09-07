@@ -31,9 +31,9 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ["@overlay-manager/react"],
+    include: ["@vlkoss/cue"],
   },
   ssr: {
-    noExternal: ["@overlay-manager/react"],
+    noExternal: ["@vlkoss/cue"],
   },
 });

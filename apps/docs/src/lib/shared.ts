@@ -1,10 +1,10 @@
-export const appName = "overlay-manager";
+export const appName = "cue";
 export const docsRoute = "/docs";
 export const docsImageRoute = "/og/docs";
 
 export const gitConfig = {
   user: "mauroerta",
-  repo: "overlay-manager",
+  repo: "cue",
   branch: "main",
 };
 

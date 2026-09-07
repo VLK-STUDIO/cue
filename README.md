@@ -1,15 +1,15 @@
-# overlay-manager
+# cue
 
 Register a dialog once. Open it from anywhere.
 
-[`@overlay-manager/react`](./packages/react) is an imperative overlay API for React. Define an overlay next to the component it renders, then call `open()` from a click handler, a route effect, or another overlay. No local `useState`.
+[`@vlkoss/cue`](./packages/react) is an imperative overlay API for React. Define an overlay next to the component it renders, then call `open()` from a click handler, a route effect, or another overlay. No local `useState`.
 
 Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.
 
 ## Install
 
 ```sh
-npm i @overlay-manager/react
+npm i @vlkoss/cue
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm i @overlay-manager/react
 Wrap the tree once:
 
 ```tsx
-import { OverlayProvider } from "@overlay-manager/react";
+import { OverlayProvider } from "@vlkoss/cue";
 
 export function App() {
   return (
@@ -31,7 +31,7 @@ export function App() {
 Create an overlay:
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@overlay-manager/react";
+import { createOverlay, type OverlayProps } from "@vlkoss/cue";
 import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props: OverlayProps) => (

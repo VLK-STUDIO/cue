@@ -1,14 +1,14 @@
 ---
 title: Getting Started
-description: Install overlay-manager and open your first dialog.
+description: Install cue and open your first dialog.
 ---
 
-`@overlay-manager/react` lets you register a dialog once, then open it from a click handler, a route effect, or another overlay.
+`@vlkoss/cue` lets you register a dialog once, then open it from a click handler, a route effect, or another overlay.
 
 ## Installation
 
 ```npm
-npm i @overlay-manager/react
+npm i @vlkoss/cue
 ```
 
 ## Add the provider
@@ -16,7 +16,7 @@ npm i @overlay-manager/react
 Render `OverlayProvider` once near the root of your app.
 
 ```tsx
-import { OverlayProvider } from "@overlay-manager/react";
+import { OverlayProvider } from "@vlkoss/cue";
 
 export function App() {
   return (
@@ -32,7 +32,7 @@ export function App() {
 Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it.
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@overlay-manager/react";
+import { createOverlay, type OverlayProps } from "@vlkoss/cue";
 import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props: OverlayProps) => (

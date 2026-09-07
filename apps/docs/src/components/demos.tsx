@@ -6,7 +6,7 @@ import {
   welcomeDialog,
 } from "./overlays";
 
-const defaultCode = `import { createOverlay, type OverlayProps } from "@overlay-manager/react";
+const defaultCode = `import { createOverlay, type OverlayProps } from "@vlkoss/cue";
 import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props) => (
