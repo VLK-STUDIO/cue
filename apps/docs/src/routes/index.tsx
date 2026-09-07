@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
+import { LogoMark } from "@/components/logo";
 import { baseOptions } from "@/lib/layout.shared";
 import { appName, githubUrl } from "@/lib/shared";
 import { welcomeDialog } from "@/components/overlays";
@@ -12,6 +13,7 @@ function Home() {
   return (
     <HomeLayout {...baseOptions()} className="relative">
       <div className="om-landing">
+        <LogoMark className="om-logo om-logo-hero" />
         <h1 className="om-landing-title">{appName}</h1>
         <p className="om-landing-tagline">Register a dialog once. Open it from anywhere.</p>
         <div className="om-landing-actions">

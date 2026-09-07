@@ -6,6 +6,27 @@
   --om-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+/* Brand mark: PNG alpha as mask, filled with currentColor */
+.om-logo {
+  display: block;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask: url("/logo.png?v=2") center / contain no-repeat;
+  -webkit-mask: url("/logo.png?v=2") center / contain no-repeat;
+}
+
+.om-logo-nav {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.om-logo-hero {
+  width: clamp(4.75rem, 14vw, 7rem);
+  height: clamp(4.75rem, 14vw, 7rem);
+  margin-bottom: 1.35rem;
+  color: var(--color-fd-foreground);
+}
+
 html {
   scrollbar-gutter: stable;
 }

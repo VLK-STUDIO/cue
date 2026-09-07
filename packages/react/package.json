@@ -9,6 +9,15 @@
     "overlay",
     "react"
   ],
+  "homepage": "https://github.com/mauroerta/cue#readme",
+  "bugs": {
+    "url": "https://github.com/mauroerta/cue/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mauroerta/cue.git",
+    "directory": "packages/react"
+  },
   "license": "MIT",
   "files": [
     "dist"

@@ -34,6 +34,7 @@ pnpm check-types  # typecheck
 pnpm lint         # lint
 pnpm format       # check formatting
 pnpm format:fix   # write formatting
+pnpm changeset    # add a changeset for a library change
 ```
 
 Filter a single package:
@@ -53,11 +54,37 @@ pnpm --filter @vlkoss/cue build
 pnpm --filter @vlkoss/cue test
 ```
 
-Publish only after a clean build:
+## Versioning and publishing
+
+`@vlkoss/cue` is versioned with [Changesets](https://github.com/changesets/changesets). Private apps and configs are not published.
+
+### Add a changeset
+
+When a PR changes the library, run:
 
 ```sh
-pnpm --filter @vlkoss/cue publish
+pnpm changeset
 ```
+
+Select `@vlkoss/cue`, pick major / minor / patch, write a one-line summary, and commit the new file under `.changeset/`.
+
+### Release on CI
+
+Pushes to `main` run [`.github/workflows/release.yml`](./.github/workflows/release.yml):
+
+1. Pending changesets open a "Version Packages" PR (bumps version, updates `CHANGELOG.md`).
+2. Merging that PR publishes to npm.
+
+The workflow needs an `NPM_TOKEN` repository secret with publish access to the `@vlkoss` scope. For a first publish, create the `@vlkoss` org (or claim the scope) on npm if it does not exist yet.
+
+### Release locally
+
+```sh
+pnpm version-packages
+pnpm release
+```
+
+You must be logged in to npm (`npm login`) with publish rights.
 
 ## Docs site
 
@@ -71,8 +98,9 @@ pnpm --filter docs dev
 
 1. Keep changes scoped. Prefer one concern per PR.
 2. Add or update tests when behavior changes (`packages/react`).
-3. Run `pnpm check-types`, `pnpm test`, and `pnpm lint` before opening the PR.
-4. Match existing naming and file layout. Do not invent parallel abstractions next to working ones.
+3. If the library changed, add a changeset (`pnpm changeset`).
+4. Run `pnpm check-types`, `pnpm test`, and `pnpm lint` before opening the PR.
+5. Match existing naming and file layout. Do not invent parallel abstractions next to working ones.
 
 ## License
 
