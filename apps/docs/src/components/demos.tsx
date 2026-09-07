@@ -1,10 +1,5 @@
 import { Demo } from "./demo";
-import {
-  asyncConfirmDialog,
-  confirmDeleteDialog,
-  settingsDialog,
-  welcomeDialog,
-} from "./overlays";
+import { asyncConfirmDialog, confirmDeleteDialog, settingsDialog, welcomeDialog } from "./overlays";
 
 const defaultCode = `import { createOverlay, type OverlayProps } from "@vlkoss/cue";
 import { Dialog } from "./dialog";
@@ -23,7 +18,11 @@ settingsDialog.open();`;
 export function DefaultDemo() {
   return (
     <Demo code={defaultCode}>
-      <button type="button" className="om-button om-button-primary" onClick={() => settingsDialog.open()}>
+      <button
+        type="button"
+        className="om-button om-button-primary"
+        onClick={() => settingsDialog.open()}
+      >
         Open dialog
       </button>
     </Demo>
@@ -72,7 +71,11 @@ confirmDeleteDialog.open({
 export function StackingDemo() {
   return (
     <Demo code={stackingCode}>
-      <button type="button" className="om-button om-button-primary" onClick={() => settingsDialog.open()}>
+      <button
+        type="button"
+        className="om-button om-button-primary"
+        onClick={() => settingsDialog.open()}
+      >
         Open settings
       </button>
     </Demo>
@@ -109,7 +112,11 @@ const welcomeCode = `welcomeDialog.open();`;
 export function WelcomeDemo() {
   return (
     <Demo code={welcomeCode}>
-      <button type="button" className="om-button om-button-primary" onClick={() => welcomeDialog.open()}>
+      <button
+        type="button"
+        className="om-button om-button-primary"
+        onClick={() => welcomeDialog.open()}
+      >
         Open dialog
       </button>
     </Demo>

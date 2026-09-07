@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@4.0.0/schema.json",
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "mauroerta/cue" }
-  ],
+  "changelog": ["@changesets/changelog-github", { "repo": "mauroerta/cue" }],
   "commit": false,
   "fixed": [],
   "linked": [],

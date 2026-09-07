@@ -71,9 +71,7 @@ Pass a props generic when the overlay needs data at open time:
 ```tsx
 export const confirmDeleteDialog = createOverlay<{
   organizationName: string;
-}>((props) => (
-  <Dialog {...props} title={`Delete ${props.organizationName}?`} />
-));
+}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
 
 confirmDeleteDialog.open({ organizationName: "Atlas" });
 ```
@@ -86,12 +84,12 @@ confirmDeleteDialog.open({ organizationName: "Atlas" });
 
 Returns `{ open, close, openAsync, component }`.
 
-| Method | Description |
-| --- | --- |
-| `open(props?)` | Show the overlay. Extra props are required when you pass a props generic. |
+| Method                        | Description                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `open(props?)`                | Show the overlay. Extra props are required when you pass a props generic.                                                                        |
 | `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
-| `openAsync(props?)` | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes. |
-| `component` | The component you passed in. |
+| `openAsync(props?)`           | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes.                                                         |
+| `component`                   | The component you passed in.                                                                                                                     |
 
 ### `OverlayProvider`
 

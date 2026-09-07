@@ -13,12 +13,12 @@
   "bugs": {
     "url": "https://github.com/mauroerta/cue/issues"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mauroerta/cue.git",
     "directory": "packages/react"
   },
-  "license": "MIT",
   "files": [
     "dist"
   ],

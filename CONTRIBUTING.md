@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is a pnpm + Turborepo monorepo for `@vlkoss/cue`. The root [README.md](./README.md) is for people *using* the package. This file is for people *changing* it.
+This repo is a pnpm + Turborepo monorepo for `@vlkoss/cue`. The root [README.md](./README.md) is for people _using_ the package. This file is for people _changing_ it.
 
 ## Setup
 
@@ -13,12 +13,12 @@ pnpm install
 
 ## Layout
 
-| Path | Role |
-| --- | --- |
-| `packages/react` | `@vlkoss/cue` library |
-| `packages/typescript-config` | Shared TypeScript config |
-| `apps/playground` | Vite app that exercises the library |
-| `apps/docs` | Fumadocs site (landing + docs + live demos) |
+| Path                         | Role                                        |
+| ---------------------------- | ------------------------------------------- |
+| `packages/react`             | `@vlkoss/cue` library                       |
+| `packages/typescript-config` | Shared TypeScript config                    |
+| `apps/playground`            | Vite app that exercises the library         |
+| `apps/docs`                  | Fumadocs site (landing + docs + live demos) |
 
 Agent skills live under [`.agents/skills/`](./.agents/skills/). See [AGENTS.md](./AGENTS.md) when working with an agent in this repo.
 

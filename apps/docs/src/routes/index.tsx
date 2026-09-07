@@ -28,11 +28,7 @@ function Home() {
             GitHub →
           </a>
         </div>
-        <Link
-          to="/docs/$"
-          params={{ _splat: "" }}
-          className="om-landing-docs"
-        >
+        <Link to="/docs/$" params={{ _splat: "" }} className="om-landing-docs">
           Documentation
         </Link>
       </div>

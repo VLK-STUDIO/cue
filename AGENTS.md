@@ -13,23 +13,23 @@ Match the branch, then open that skill. One skill per branch unless a skill name
 
 ### Model-invoked (fire when the branch matches)
 
-| Branch | Skill |
-| --- | --- |
-| Designing or deepening a module interface, placing a seam, making code more testable or AI-navigable | [`codebase-design`](.agents/skills/codebase-design/SKILL.md) |
-| Sharpening terminology, writing or editing `CONTEXT.md`, recording or editing an ADR | [`domain-modeling`](.agents/skills/domain-modeling/SKILL.md) |
-| UI polish, motion, press feedback, dialog/drawer/toast feel | [`emil-design-eng`](.agents/skills/emil-design-eng/SKILL.md) |
-| Feature or bug fix test-first, red-green-refactor, integration tests | [`tdd`](.agents/skills/tdd/SKILL.md) |
-| `turbo.json`, pipelines, `--filter` / `--affected`, cache, `apps/` + `packages/` layout | [`turborepo`](.agents/skills/turborepo/SKILL.md) |
-| Creating or editing a skill, or editing this file / `CLAUDE.md` | [`writing-for-agents`](.agents/skills/writing-for-agents/SKILL.md) |
+| Branch                                                                                               | Skill                                                              |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Designing or deepening a module interface, placing a seam, making code more testable or AI-navigable | [`codebase-design`](.agents/skills/codebase-design/SKILL.md)       |
+| Sharpening terminology, writing or editing `CONTEXT.md`, recording or editing an ADR                 | [`domain-modeling`](.agents/skills/domain-modeling/SKILL.md)       |
+| UI polish, motion, press feedback, dialog/drawer/toast feel                                          | [`emil-design-eng`](.agents/skills/emil-design-eng/SKILL.md)       |
+| Feature or bug fix test-first, red-green-refactor, integration tests                                 | [`tdd`](.agents/skills/tdd/SKILL.md)                               |
+| `turbo.json`, pipelines, `--filter` / `--affected`, cache, `apps/` + `packages/` layout              | [`turborepo`](.agents/skills/turborepo/SKILL.md)                   |
+| Creating or editing a skill, or editing this file / `CLAUDE.md`                                      | [`writing-for-agents`](.agents/skills/writing-for-agents/SKILL.md) |
 
 ### User-invoked (only when the user asks, or names the skill)
 
-| Branch | Skill |
-| --- | --- |
-| Relentless interview to sharpen a plan or design | [`grill-me`](.agents/skills/grill-me/SKILL.md) |
-| Compact this conversation for a fresh agent | [`handoff`](.agents/skills/handoff/SKILL.md) |
+| Branch                                                        | Skill                                                                                    |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Relentless interview to sharpen a plan or design              | [`grill-me`](.agents/skills/grill-me/SKILL.md)                                           |
+| Compact this conversation for a fresh agent                   | [`handoff`](.agents/skills/handoff/SKILL.md)                                             |
 | Scan for deepening opportunities, HTML report, then grill one | [`improve-codebase-architecture`](.agents/skills/improve-codebase-architecture/SKILL.md) |
-| Strip AI tells from writing (also the standing habit above) | [`unslop`](.agents/skills/unslop/SKILL.md) |
+| Strip AI tells from writing (also the standing habit above)   | [`unslop`](.agents/skills/unslop/SKILL.md)                                               |
 
 When a user-invoked skill would clearly help and the user has not named it, name it once and ask. Do not run it unprompted.
 
