@@ -8,7 +8,7 @@
     "build": "pnpm -w run registry:build && vite build",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "types:check": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
     "lint": "oxlint",
     "format": "oxfmt --check"
   },

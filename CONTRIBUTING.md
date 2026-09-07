@@ -106,7 +106,7 @@ pnpm --filter docs dev
 1. Keep changes scoped. Prefer one concern per PR.
 2. Add or update tests when behavior changes (`packages/react`).
 3. If the library changed, add a changeset (`pnpm changeset`).
-4. Run `pnpm check-types`, `pnpm test`, and `pnpm lint` before opening the PR.
+4. Run `pnpm format`, `pnpm lint`, `pnpm check-types`, and `pnpm test` before opening the PR. CI runs those plus `pnpm build` on every pull request and on pushes to `main`.
 5. Match existing naming and file layout. Do not invent parallel abstractions next to working ones.
 
 ## License
