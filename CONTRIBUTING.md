@@ -17,7 +17,6 @@ pnpm install
 | ---------------------------- | ------------------------------------------- |
 | `packages/react`             | `@vlkoss/cue` library                       |
 | `packages/typescript-config` | Shared TypeScript config                    |
-| `apps/playground`            | Vite app that exercises the library         |
 | `apps/docs`                  | Fumadocs site (landing + docs + live demos) |
 
 Agent skills live under [`.agents/skills/`](./.agents/skills/). See [AGENTS.md](./AGENTS.md) when working with an agent in this repo.
@@ -27,7 +26,7 @@ Agent skills live under [`.agents/skills/`](./.agents/skills/). See [AGENTS.md](
 From the repo root:
 
 ```sh
-pnpm dev          # playground, docs, and library watch via turbo
+pnpm dev          # docs and library watch via turbo
 pnpm build        # build packages
 pnpm test         # unit tests
 pnpm check-types  # typecheck
@@ -42,7 +41,6 @@ Filter a single package:
 ```sh
 pnpm --filter @vlkoss/cue test
 pnpm --filter docs dev
-pnpm --filter playground dev
 ```
 
 ## Library workflow

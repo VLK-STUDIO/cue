@@ -12,9 +12,7 @@ Register a confirm dialog once. Open it from a table row, a command palette, a r
 ```tsx
 export const confirmDeleteDialog = createOverlay<{
   organizationName: string;
-}>((props) => (
-  <Dialog {...props} title={`Delete ${props.organizationName}?`} />
-));
+}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
 
 // table row
 confirmDeleteDialog.open({ organizationName: row.name });

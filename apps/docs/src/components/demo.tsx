@@ -13,9 +13,7 @@ export function Demo({ children }: DemoProps) {
   const nodes = Children.toArray(children).filter((child) => {
     return typeof child !== "string" || child.trim().length > 0;
   });
-  const preview = nodes.find(
-    (child) => isValidElement(child) && child.type === DemoPreview,
-  );
+  const preview = nodes.find((child) => isValidElement(child) && child.type === DemoPreview);
   const code = nodes.filter((child) => child !== preview);
 
   return (

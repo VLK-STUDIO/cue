@@ -50,11 +50,7 @@ function ProjectSettings() {
       <button type="button" onClick={() => setOpen(true)}>
         Delete project
       </button>
-      <confirmDeleteDialog.component
-        open={open}
-        onOpenChange={setOpen}
-        organizationName="Atlas"
-      />
+      <confirmDeleteDialog.component open={open} onOpenChange={setOpen} organizationName="Atlas" />
     </ProjectForm>
   );
 }
