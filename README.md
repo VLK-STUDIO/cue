@@ -107,6 +107,10 @@ The singleton store used by `createOverlay` and `OverlayProvider`. You rarely ca
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## Credits
+
+Docs design stolen from [Emil Kowalski](https://emilkowal.ski/) ([@emilkowalski](https://x.com/emilkowalski)), especially [Sonner](https://sonner.emilkowal.ski/) and [Vaul](https://vaul.emilkowal.ski/).
+
 ## License
 
 [MIT](./LICENSE)
