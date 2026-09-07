@@ -86,13 +86,7 @@ The singleton store used by `createOverlay` and `OverlayProvider`. You rarely ca
 
 ## Docs
 
-Interactive examples live in [`apps/docs`](./apps/docs):
-
-```sh
-pnpm --filter docs dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000).
+[cue.vlkstudio.com](https://cue.vlkstudio.com)
 
 ## Contributing
 

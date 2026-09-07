@@ -22,6 +22,7 @@ export default defineRailway(() => {
       ],
     },
     start: "pnpm --filter docs start",
+    domains: ["cue.vlkstudio.com"],
     env: {
       NODE_ENV: "production",
     },
