@@ -10,6 +10,8 @@ Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, B
 npm i @vlkoss/cue
 ```
 
+Source install via shadcn: see the [docs](https://cue.vlkstudio.com/docs) or root README.
+
 ## Usage
 
 Wrap the tree once:

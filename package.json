@@ -12,7 +12,8 @@
     "test": "turbo run test",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=@vlkoss/cue && changeset publish"
+    "release": "turbo run build --filter=@vlkoss/cue && changeset publish",
+    "registry:build": "pnpm dlx shadcn@latest build --output apps/docs/public/r"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",

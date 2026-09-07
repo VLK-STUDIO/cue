@@ -8,8 +8,25 @@ Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, B
 
 ## Install
 
+npm:
+
 ```sh
 npm i @vlkoss/cue
+```
+
+Or via the [shadcn registry](https://ui.shadcn.com/docs/registry):
+
+```sh
+npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
+```
+
+```sh
+npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
+npx shadcn@latest add @cue/cue
+```
+
+```sh
+npx shadcn@latest add mauroerta/cue/cue
 ```
 
 ## Usage

@@ -11,6 +11,42 @@ description: Install cue and open your first dialog.
 npm i @vlkoss/cue
 ```
 
+### shadcn
+
+If you prefer, install cue from the [shadcn registry](https://ui.shadcn.com/docs/registry) and customize the source in your project. Pick one:
+
+<Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
+  <Tab value="URL">
+
+```npm
+npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
+```
+
+  </Tab>
+  <Tab value="Namespace">
+
+Register the registry once. `{name}` is a URL template the CLI fills with the item name (`cue` → `…/r/cue.json`):
+
+```npm
+npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
+npx shadcn@latest add @cue/cue
+```
+
+  </Tab>
+  <Tab value="GitHub">
+
+```npm
+npx shadcn@latest add mauroerta/cue/cue
+```
+
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+With the registry install, import from your project's `@/lib/cue` path (or whatever
+`aliases.lib` resolves to) instead of `@vlkoss/cue`.
+</Callout>
+
 ## Add the provider
 
 Render `OverlayProvider` once near the root of your app.

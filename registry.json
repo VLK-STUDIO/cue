@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "cue",
+  "homepage": "https://cue.vlkstudio.com",
+  "items": [
+    {
+      "name": "cue",
+      "type": "registry:lib",
+      "title": "Cue",
+      "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
+      "files": [
+        {
+          "path": "packages/react/src/index.ts",
+          "type": "registry:lib",
+          "target": "@lib/cue/index.ts"
+        },
+        {
+          "path": "packages/react/src/overlay-manager.ts",
+          "type": "registry:lib",
+          "target": "@lib/cue/overlay-manager.ts"
+        },
+        {
+          "path": "packages/react/src/overlay-provider.tsx",
+          "type": "registry:component",
+          "target": "@lib/cue/overlay-provider.tsx"
+        }
+      ],
+      "docs": "Wrap your app in OverlayProvider, then createOverlay(...) next to the dialog it renders. https://cue.vlkstudio.com/docs"
+    }
+  ]
+}

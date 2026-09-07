@@ -86,6 +86,15 @@ pnpm release
 
 You must be logged in to npm (`npm login`) with publish rights.
 
+## shadcn registry
+
+Single source of truth: `registry.json` at the repo root (points at `packages/react/src`). That powers:
+
+- GitHub installs: `npx shadcn@latest add mauroerta/cue/cue`
+- Hosted installs after docs build: `https://cue.vlkstudio.com/r/cue.json`
+
+`apps/docs/public/r` is **generated** by `pnpm registry:build` (inlined item JSON for the CLI). It is gitignored. Docs `dev` and `build` both regenerate it so the site never serves a stale hand-copied catalog.
+
 ## Docs site
 
 Content is MDX in `apps/docs/content/docs`. Live demos use `@vlkoss/cue` from the workspace. Sidebar order is controlled by `meta.json` files (Fumadocs page tree).

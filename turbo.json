@@ -7,10 +7,11 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*", "$TURBO_ROOT$/registry.json"],
       "outputs": [
         "dist/**",
         ".output/**",
+        "public/r/**",
         ".next/**",
         "!.next/cache/**",
         "!.next/dev/**"
