@@ -88,7 +88,7 @@ You must be logged in to npm (`npm login`) with publish rights.
 
 ## shadcn registry
 
-Single source of truth: `registry.json` at the repo root (points at `packages/react/src`). That powers:
+Single source of truth: `registry.json` plus `registry/cue.ts` (a re-export of `@vlkoss/cue`). That powers:
 
 - GitHub installs: `npx shadcn@latest add mauroerta/cue/cue`
 - Hosted installs after docs build: `https://cue.vlkstudio.com/r/cue.json`

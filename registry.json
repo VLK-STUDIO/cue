@@ -8,21 +8,12 @@
       "type": "registry:lib",
       "title": "Cue",
       "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
+      "dependencies": ["@vlkoss/cue"],
       "files": [
         {
-          "path": "packages/react/src/index.ts",
+          "path": "registry/cue.ts",
           "type": "registry:lib",
-          "target": "@lib/cue/index.ts"
-        },
-        {
-          "path": "packages/react/src/overlay-manager.ts",
-          "type": "registry:lib",
-          "target": "@lib/cue/overlay-manager.ts"
-        },
-        {
-          "path": "packages/react/src/overlay-provider.tsx",
-          "type": "registry:component",
-          "target": "@lib/cue/overlay-provider.tsx"
+          "target": "@lib/cue.ts"
         }
       ],
       "docs": "Wrap your app in OverlayProvider, then createOverlay(...) next to the dialog it renders. https://cue.vlkstudio.com/docs"

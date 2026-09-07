@@ -13,7 +13,7 @@ npm i @vlkoss/cue
 
 ### shadcn
 
-If you prefer, install cue from the [shadcn registry](https://ui.shadcn.com/docs/registry) and customize the source in your project. Pick one:
+If you prefer, install cue from the [shadcn registry](https://ui.shadcn.com/docs/registry). That adds `@vlkoss/cue` and a local re-export you can wrap. Pick one:
 
 <Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
   <Tab value="URL">
@@ -43,8 +43,9 @@ npx shadcn@latest add mauroerta/cue/cue
 </Tabs>
 
 <Callout type="info">
-With the registry install, import from your project's `@/lib/cue` path (or whatever
-`aliases.lib` resolves to) instead of `@vlkoss/cue`.
+With the registry install, import from `@/lib/cue` (or whatever `aliases.lib`
+resolves to). That file re-exports `@vlkoss/cue`, so you can wrap or extend the
+API in one place without forking the package.
 </Callout>
 
 ## Add the provider
