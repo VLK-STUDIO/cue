@@ -18,10 +18,8 @@ export default defineConfig({
       },
     }),
     react(),
-    // please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
-    nitro({
-      preset: "vercel",
-    }),
+    // Railway / Node: https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro
+    nitro(),
   ],
   resolve: {
     tsconfigPaths: true,
