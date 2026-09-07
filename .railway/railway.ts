@@ -9,7 +9,7 @@ import { defineRailway, github, project, service } from "railway/iac";
  */
 export default defineRailway(() => {
   const docs = service("docs", {
-    source: github("mauroerta/cue", { branch: "main" }),
+    source: github("VLK-STUDIO/cue", { branch: "main" }),
     build: {
       buildCommand: "pnpm turbo run build --filter=docs",
       watchPatterns: [

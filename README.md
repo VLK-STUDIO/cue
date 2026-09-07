@@ -26,7 +26,7 @@ npx shadcn@latest add @cue/cue
 ```
 
 ```sh
-npx shadcn@latest add mauroerta/cue/cue
+npx shadcn@latest add VLK-STUDIO/cue/cue
 ```
 
 ## Usage

@@ -88,7 +88,7 @@ You must be logged in to npm (`npm login`) with publish rights.
 
 Single source of truth: `registry.json` plus `registry/cue.ts` (a re-export of `@vlkoss/cue`). That powers:
 
-- GitHub installs: `npx shadcn@latest add mauroerta/cue/cue`
+- GitHub installs: `npx shadcn@latest add VLK-STUDIO/cue/cue`
 - Hosted installs after docs build: `https://cue.vlkstudio.com/r/cue.json`
 
 `apps/docs/public/r` is **generated** by `pnpm registry:build` (inlined item JSON for the CLI). It is gitignored. Docs `dev` and `build` both regenerate it so the site never serves a stale hand-copied catalog.

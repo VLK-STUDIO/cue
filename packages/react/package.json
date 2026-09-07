@@ -9,14 +9,14 @@
     "overlay",
     "react"
   ],
-  "homepage": "https://github.com/mauroerta/cue#readme",
+  "homepage": "https://github.com/VLK-STUDIO/cue#readme",
   "bugs": {
-    "url": "https://github.com/mauroerta/cue/issues"
+    "url": "https://github.com/VLK-STUDIO/cue/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mauroerta/cue.git",
+    "url": "git+https://github.com/VLK-STUDIO/cue.git",
     "directory": "packages/react"
   },
   "files": [
