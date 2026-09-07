@@ -72,7 +72,7 @@ Returns `{ open, close, openAsync, component }`.
 | `open(props?)`                | Show the overlay. Extra props are required when you pass a props generic.                                                                        |
 | `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
 | `openAsync(props?)`           | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes.                                                         |
-| `component`                   | The component you passed in.                                                                                                                     |
+| `component`                   | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.         |
 
 ### `OverlayProvider`
 

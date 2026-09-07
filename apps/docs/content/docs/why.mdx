@@ -1,0 +1,64 @@
+---
+title: Why cue
+description: Open the same overlay from distant UI, or from code that is not a component.
+---
+
+Local `useState` is the right tool when a dialog belongs to one screen and the button that opens it sits next to it. Cue is for when the open call lives far from the dialog, or outside React entirely.
+
+## One overlay, many callers
+
+Register a confirm dialog once. Open it from a table row, a command palette, a route effect, or another overlay. You do not lift an `open` flag or thread callbacks through the tree.
+
+```tsx
+export const confirmDeleteDialog = createOverlay<{
+  organizationName: string;
+}>((props) => (
+  <Dialog {...props} title={`Delete ${props.organizationName}?`} />
+));
+
+// table row
+confirmDeleteDialog.open({ organizationName: row.name });
+
+// command palette
+confirmDeleteDialog.open({ organizationName: selected.name });
+```
+
+That includes opening from another overlay. They [stack](/docs/examples/stacking).
+
+## `open()` is not a hook
+
+The handle is a plain object. `open()` works outside a component.
+
+A `queryFn` can live at module scope, hit an endpoint, then open a dialog. Nothing here needs to be a hook.
+
+```tsx
+export const sessionExpiredDialog = createOverlay((props) => (
+  <Dialog {...props} title="Session expired" />
+));
+
+async function fetchProject(id: string) {
+  const response = await api.getProject(id);
+
+  if (response.status === 401) {
+    sessionExpiredDialog.open();
+    throw new Error("Unauthorized");
+  }
+
+  return response.data;
+}
+
+export function useProject(id: string) {
+  return useQuery({
+    queryKey: ["project", id],
+    queryFn: () => fetchProject(id),
+  });
+}
+```
+
+`OverlayProvider` still has to be mounted. Open on a decision in the result, not on every successful fetch.
+
+[`openAsync`](/docs/examples/open-async) is the same idea when you need to wait. It returns a Promise that resolves when the overlay closes, so an async handler can pause until the user dismisses it.
+
+## When not to use cue
+
+If the dialog is owned by one screen and nothing else needs that same instance, keep local state. Cue is extra machinery for a problem you do not have.

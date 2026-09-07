@@ -5,7 +5,21 @@ description: Wait for an overlay to close with a Promise.
 
 `openAsync` opens the overlay and returns a `Promise<boolean>` that resolves `false` when it closes.
 
-<OpenAsyncDemo />
+<Demo>
+  <DemoPreview>
+    <OpenAsyncDemo />
+  </DemoPreview>
+
+```tsx
+const confirmed = await asyncConfirmDialog.openAsync({
+  message: "Archive this project?",
+});
+
+// false when the overlay closes
+console.log(confirmed);
+```
+
+</Demo>
 
 ## Example
 

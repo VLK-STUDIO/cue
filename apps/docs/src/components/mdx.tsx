@@ -1,7 +1,7 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import * as TabsComponents from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
-import { Demo } from "./demo";
+import { Demo, DemoPreview } from "./demo";
 import { DefaultDemo, OpenAsyncDemo, StackingDemo, TypedPropsDemo, WelcomeDemo } from "./demos";
 
 export function getMDXComponents(components?: MDXComponents) {
@@ -9,6 +9,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     ...TabsComponents,
     Demo,
+    DemoPreview,
     DefaultDemo,
     TypedPropsDemo,
     StackingDemo,

@@ -159,6 +159,10 @@ html > body[data-scroll-locked] {
   border: 1px solid var(--color-fd-border);
 }
 
+.om-demo-code figure {
+  margin: 0;
+}
+
 /* Dialog */
 .om-dialog-backdrop {
   position: fixed;

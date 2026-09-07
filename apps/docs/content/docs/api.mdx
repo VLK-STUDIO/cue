@@ -16,7 +16,7 @@ const dialog = createOverlay((props) => <Dialog {...props} />);
 | `open(props?)`                | Show the overlay. Extra props are required when you pass a props generic.                                                                        |
 | `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
 | `openAsync(props?)`           | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes.                                                         |
-| `component`                   | The component you passed in.                                                                                                                     |
+| `component`                   | The component you passed in. Rare. See below.                                                                                                    |
 
 ### Typed props
 
@@ -30,6 +30,34 @@ export const confirmDeleteDialog = createOverlay<{
 confirmDeleteDialog.open({
   organizationName: "Atlas",
 });
+```
+
+### `component`
+
+<Callout type="warn" title="Escape hatch">
+  You almost never need this. Call `open()`. Render the component yourself only when the overlay
+  must sit inside a local tree that `OverlayProvider` does not wrap.
+</Callout>
+
+The provider mounts overlays at the root. That instance cannot see a page-level form context or a feature provider lower in the tree. Drive `open` and `onOpenChange` yourself and put the same component in that tree.
+
+```tsx
+function ProjectSettings() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ProjectForm>
+      <button type="button" onClick={() => setOpen(true)}>
+        Delete project
+      </button>
+      <confirmDeleteDialog.component
+        open={open}
+        onOpenChange={setOpen}
+        organizationName="Atlas"
+      />
+    </ProjectForm>
+  );
+}
 ```
 
 ## `OverlayProvider`

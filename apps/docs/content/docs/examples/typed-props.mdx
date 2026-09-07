@@ -5,7 +5,28 @@ description: Pass data into an overlay when you open it.
 
 Give `createOverlay` a props generic. TypeScript then requires those props on `open()`.
 
-<TypedPropsDemo />
+<Demo>
+  <DemoPreview>
+    <TypedPropsDemo />
+  </DemoPreview>
+
+```tsx
+export const confirmDeleteDialog = createOverlay<{
+  organizationName: string;
+}>((props) => (
+  <Dialog {...props} title={`Delete ${props.organizationName}?`}>
+    <button type="button" onClick={() => confirmDeleteDialog.close()}>
+      Cancel
+    </button>
+  </Dialog>
+));
+
+confirmDeleteDialog.open({
+  organizationName: "Helios",
+});
+```
+
+</Demo>
 
 ## Example
 

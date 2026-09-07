@@ -5,7 +5,21 @@ description: Open an overlay from another overlay.
 
 Overlays stack. Open one from inside another without setting up a portal.
 
-<StackingDemo />
+<Demo>
+  <DemoPreview>
+    <StackingDemo />
+  </DemoPreview>
+
+```tsx
+settingsDialog.open();
+
+// From inside Settings:
+confirmDeleteDialog.open({
+  organizationName: "Atlas",
+});
+```
+
+</Demo>
 
 Open **Settings**, then **Delete Atlas…** to put a confirm dialog on top.
 

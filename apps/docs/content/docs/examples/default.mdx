@@ -5,7 +5,28 @@ description: Register a dialog and open it with no extra props.
 
 Create an overlay, then call `open()`.
 
-<DefaultDemo />
+<Demo>
+  <DemoPreview>
+    <DefaultDemo />
+  </DemoPreview>
+
+```tsx
+import { createOverlay, type OverlayProps } from "@vlkoss/cue";
+import { Dialog } from "./dialog";
+
+export const settingsDialog = createOverlay((props) => (
+  <Dialog {...props} title="Settings">
+    <p>No local useState required.</p>
+    <button type="button" onClick={() => settingsDialog.close()}>
+      Close
+    </button>
+  </Dialog>
+));
+
+settingsDialog.open();
+```
+
+</Demo>
 
 ## Anatomy
 
