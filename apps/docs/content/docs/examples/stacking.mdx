@@ -26,23 +26,28 @@ Open Settings, then Delete Atlas to put a confirm dialog on top. Closing the top
 ## Example
 
 ```tsx
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+
 export const settingsDialog = cue.createOverlay((_props, ctx) => {
   const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange} title="Settings">
-      <components.wrapper>
-        <button
-          type="button"
-          onClick={() =>
-            confirmDeleteDialog.open({
-              organizationName: "Atlas",
-            })
-          }
-        >
-          Delete Atlas…
-        </button>
-      </components.wrapper>
+    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <DialogContent showBackdrop={false}>
+        <DialogTitle>Settings</DialogTitle>
+        <components.footer>
+          <Button
+            onClick={() =>
+              confirmDeleteDialog.open({
+                organizationName: "Atlas",
+              })
+            }
+          >
+            Delete Atlas…
+          </Button>
+        </components.footer>
+      </DialogContent>
     </Dialog>
   );
 });

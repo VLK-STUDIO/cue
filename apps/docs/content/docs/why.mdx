@@ -10,19 +10,22 @@ Local `useState` is the right tool when a dialog belongs to one screen and its o
 Create one Cue environment and one typed confirm dialog. Any client-side caller can open it:
 
 ```tsx
-export const cue = createCue();
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { CueBackdrop } from "@/components/cue-backdrop";
+
+export const cue = createCue({ backdrop: CueBackdrop });
 
 export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
 }>((props, ctx) => (
-  <Dialog
-    open={ctx.open}
-    onOpenChange={ctx.onOpenChange}
-    title={`Delete ${props.organizationName}?`}
-  >
-    <button type="button" onClick={() => ctx.close()}>
-      Cancel
-    </button>
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Delete {props.organizationName}?</DialogTitle>
+      <Button variant="outline" onClick={() => ctx.close()}>
+        Cancel
+      </Button>
+    </DialogContent>
   </Dialog>
 ));
 
@@ -41,7 +44,11 @@ The handle is a plain object. `open()` works outside a component.
 
 ```tsx
 export const sessionExpiredDialog = cue.createOverlay((_props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange} title="Session expired" />
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Session expired</DialogTitle>
+    </DialogContent>
+  </Dialog>
 ));
 
 async function fetchProject(id: string) {

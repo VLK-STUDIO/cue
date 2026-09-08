@@ -11,17 +11,21 @@ Give `cue.createOverlay()` a props generic. Required keys must be passed to `ope
   </DemoPreview>
 
 ```tsx
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+
 export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
 }>((props, ctx) => (
-  <Dialog
-    open={ctx.open}
-    onOpenChange={ctx.onOpenChange}
-    title={`Delete ${props.organizationName}?`}
-  >
-    <button type="button" onClick={() => ctx.close()}>
-      Cancel
-    </button>
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Delete {props.organizationName}?</DialogTitle>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => ctx.close()}>
+          Cancel
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 ));
 

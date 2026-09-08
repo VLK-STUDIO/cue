@@ -22,7 +22,7 @@
           "target": "@/components/cue/cue-backdrop.tsx"
         }
       ],
-      "docs": "Install a local Cue configuration with shadcn Dialog and create overlays with cue.createOverlay(...). https://cue.vlkstudio.com/docs"
+      "docs": "Install a local Cue configuration with shadcn Dialog and create overlays with cue.createOverlay(...). The generated backdrop uses the local Dialog wrapper, so DialogContent must not render a second backdrop. https://cue.vlkstudio.com/docs"
     }
   ]
 }

@@ -40,7 +40,9 @@ npx shadcn@latest add VLK-STUDIO/cue/cue
   </Tab>
 </Tabs>
 
-The registry installs shadcn's `dialog` item first, then writes a local `cue` module and a small provider-level backdrop adapter. The generated Cue module uses shadcn's `DialogFooter` as its default shared component. Change the local configuration to fit the application.
+The registry installs shadcn's `dialog` item first, then writes a local `cue` module and a provider-level backdrop adapter built from the local shadcn Dialog wrapper. The generated Cue module uses shadcn's `DialogFooter` as its default shared component. Change the local configuration to fit the application.
+
+The generated backdrop adapter creates a backdrop-only shadcn Dialog root. This supplies the Radix or Base UI context required by the native backdrop part. When an overlay uses the provider backdrop, pass `showBackdrop={false}` to `DialogContent` so it does not render a second backdrop.
 
 ## Create the Cue environment
 
@@ -105,13 +107,17 @@ The first callback argument contains only values passed to `open()` or `openAsyn
 
 ```tsx
 import { cue } from "@/components/cue";
-import { Dialog } from "./dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export const settingsDialog = cue.createOverlay((_props, ctx) => (
   <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-    <button type="button" onClick={() => ctx.close()}>
-      Close
-    </button>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Settings</DialogTitle>
+      <Button variant="outline" onClick={() => ctx.close()}>
+        Close
+      </Button>
+    </DialogContent>
   </Dialog>
 ));
 ```
@@ -124,15 +130,16 @@ const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ct
 
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      {props.message}
-      <components.footer>
-        <button type="button" onClick={() => ctx.close({ result: false })}>
-          Cancel
-        </button>
-        <button type="button" onClick={() => ctx.close({ result: true })}>
-          Confirm
-        </button>
-      </components.footer>
+      <DialogContent showBackdrop={false}>
+        <DialogTitle>Confirm</DialogTitle>
+        <p>{props.message}</p>
+        <components.footer>
+          <Button variant="outline" onClick={() => ctx.close({ result: false })}>
+            Cancel
+          </Button>
+          <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
+        </components.footer>
+      </DialogContent>
     </Dialog>
   );
 });

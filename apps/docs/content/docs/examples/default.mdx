@@ -12,16 +12,29 @@ Create the Cue environment once, then define an overlay from it:
 
 ```tsx
 import { createCue } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CueBackdrop } from "@/components/cue-backdrop";
 
-export const cue = createCue();
+export const cue = createCue({ backdrop: CueBackdrop });
 
 export const settingsDialog = cue.createOverlay((_props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange} title="Settings">
-    <p>No local useState required.</p>
-    <button type="button" onClick={() => ctx.close()}>
-      Close
-    </button>
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Settings</DialogTitle>
+      <DialogDescription>No local useState required.</DialogDescription>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => ctx.close()}>
+          Close
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 ));
 

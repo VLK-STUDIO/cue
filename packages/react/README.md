@@ -57,7 +57,7 @@ dialog.closeAll();
 
 `open()` returns a close function for one instance. `close({ result })` resolves the matching async call. Required props must be passed. If every prop is optional, both methods also accept no argument.
 
-The provider renders the overlay stack and one configured backdrop whenever at least one instance is open. Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
+The provider renders the overlay stack and one configured backdrop whenever at least one instance is open. A configured backdrop can be an application adapter around a UI library's native backdrop, but it must provide any context that library requires. Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
 
 Each call to `createCue()` creates an isolated store, provider, definitions, and lifecycle state. The package does not export global `createOverlay`, `OverlayProvider`, or `OverlayManager` values.
 

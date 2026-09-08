@@ -25,15 +25,27 @@ if (confirmed) {
 ## Example
 
 ```tsx
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 export const asyncConfirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange} title="Confirm">
-    <p>{props.message}</p>
-    <button type="button" onClick={() => ctx.close({ result: false })}>
-      Cancel
-    </button>
-    <button type="button" onClick={() => ctx.close({ result: true })}>
-      Confirm
-    </button>
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <DialogContent showBackdrop={false}>
+      <DialogTitle>Confirm</DialogTitle>
+      <DialogDescription>{props.message}</DialogDescription>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => ctx.close({ result: false })}>
+          Cancel
+        </Button>
+        <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 ));
 
@@ -47,9 +59,7 @@ Any result type works:
 
 ```tsx
 const dialog = cue.createOverlay<{ title: string }, "one" | "two" | "three">((_props, ctx) => (
-  <button type="button" onClick={() => ctx.close({ result: "two" })}>
-    Two
-  </button>
+  <Button onClick={() => ctx.close({ result: "two" })}>Two</Button>
 ));
 
 const choice = await dialog.openAsync({ title: "Pick" });

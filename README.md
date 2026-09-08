@@ -14,7 +14,7 @@ You can also install a local starter configuration through the [shadcn registry]
 npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
 ```
 
-The registry also installs shadcn's `dialog` item and generates a local `cue` module with `DialogFooter` configured as its shared footer and a single provider-level backdrop.
+The registry also installs shadcn's `dialog` item and generates a local `cue` module with `DialogFooter` configured as its shared footer and a single provider-level backdrop built from the local shadcn Dialog wrapper. The generated adapter supplies the Dialog root and portal context required by Radix or Base UI.
 
 ## Usage
 
