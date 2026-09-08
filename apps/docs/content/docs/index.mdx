@@ -40,22 +40,71 @@ npx shadcn@latest add VLK-STUDIO/cue/cue
   </Tab>
 </Tabs>
 
-The registry installs shadcn's `dialog` item first, then writes a local `cue` module and a provider-level backdrop adapter built from the local shadcn Dialog wrapper. The generated Cue module uses shadcn's `DialogFooter` as its default shared component. Change the local configuration to fit the application.
+The registry installs shadcn's `dialog` item first, then writes one local `cue` module containing the provider-level backdrop adapter and a typed map of shadcn Dialog components. Change that local configuration to fit the application.
 
-The generated backdrop adapter creates a backdrop-only shadcn Dialog root. This supplies the Radix or Base UI context required by the native backdrop part. When an overlay uses the provider backdrop, pass `showBackdrop={false}` to `DialogContent` so it does not render a second backdrop.
+The generated `content` component expects a small change to the local shadcn `DialogContent`. Add a `showBackdrop` prop, default it to `true`, and render `DialogOverlay` conditionally:
+
+```tsx
+function DialogContent({
+  showBackdrop = true,
+  ...props
+}: DialogPrimitive.Popup.Props & { showBackdrop?: boolean }) {
+  return (
+    <DialogPortal>
+      {showBackdrop && <DialogOverlay />}
+      <DialogPrimitive.Popup {...props} />
+    </DialogPortal>
+  );
+}
+```
+
+The generated `cue` module then forces `showBackdrop={false}` for every Cue overlay while the provider owns the single shared backdrop.
 
 ## Create the Cue environment
 
 ```tsx
-// components/cue/index.ts
+// components/cue/index.tsx
+import type { ComponentProps } from "react";
 import { createCue } from "@vlkoss/cue";
-import { DialogFooter } from "@/components/ui/dialog";
-import { CueBackdrop } from "./cue-backdrop";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+type CueContentProps = Omit<ComponentProps<typeof DialogContent>, "showBackdrop">;
+
+function CueContent(props: CueContentProps) {
+  return <DialogContent {...props} showBackdrop={false} />;
+}
+
+function CueBackdrop() {
+  return (
+    <Dialog open>
+      <DialogPortal>
+        <DialogOverlay />
+      </DialogPortal>
+    </Dialog>
+  );
+}
 
 export const cue = createCue({
   backdrop: CueBackdrop,
   components: {
+    content: CueContent,
     footer: DialogFooter,
+    header: DialogHeader,
+    title: DialogTitle,
+    description: DialogDescription,
+    close: DialogClose,
+    trigger: DialogTrigger,
   },
 });
 ```
@@ -108,38 +157,42 @@ The first callback argument contains only values passed to `open()` or `openAsyn
 ```tsx
 import { cue } from "@/components/cue";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 
-export const settingsDialog = cue.createOverlay((_props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-    <DialogContent showBackdrop={false}>
-      <DialogTitle>Settings</DialogTitle>
-      <Button variant="outline" onClick={() => ctx.close()}>
-        Close
-      </Button>
-    </DialogContent>
-  </Dialog>
-));
+export const settingsDialog = cue.createOverlay((_props, ctx) => {
+  const { content: Content, title: Title } = ctx.components;
+
+  return (
+    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <Content>
+        <Title>Settings</Title>
+        <Button variant="outline" onClick={() => ctx.close()}>
+          Close
+        </Button>
+      </Content>
+    </Dialog>
+  );
+});
 ```
 
 Use configured components when an overlay needs them:
 
 ```tsx
 const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const components = ctx.components;
+  const { content: Content, footer: Footer, title: Title } = ctx.components;
 
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogTitle>Confirm</DialogTitle>
+      <Content>
+        <Title>Confirm</Title>
         <p>{props.message}</p>
-        <components.footer>
+        <Footer>
           <Button variant="outline" onClick={() => ctx.close({ result: false })}>
             Cancel
           </Button>
           <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
-        </components.footer>
-      </DialogContent>
+        </Footer>
+      </Content>
     </Dialog>
   );
 });

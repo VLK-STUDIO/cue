@@ -1,47 +1,53 @@
 import { cue } from "./cue";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 
 export const welcomeDialog = cue.createOverlay((_props, ctx) => {
-  const components = ctx.components;
+  const {
+    content: Content,
+    description: Description,
+    footer: Footer,
+    header: Header,
+    title: Title,
+  } = ctx.components;
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogHeader>
-          <DialogTitle>Hello</DialogTitle>
-          <DialogDescription>
+      <Content>
+        <Header>
+          <Title>Hello</Title>
+          <Description>
             Opened with <code>welcomeDialog.open()</code>. No local state.
-          </DialogDescription>
-        </DialogHeader>
-        <components.footer>
+          </Description>
+        </Header>
+        <Footer>
           <Button variant="outline" onClick={() => ctx.close()}>
             Close
           </Button>
-        </components.footer>
-      </DialogContent>
+        </Footer>
+      </Content>
     </Dialog>
   );
 });
 
 export const settingsDialog = cue.createOverlay((_props, ctx) => {
-  const components = ctx.components;
+  const {
+    content: Content,
+    description: Description,
+    footer: Footer,
+    header: Header,
+    title: Title,
+  } = ctx.components;
 
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
+      <Content>
+        <Header>
+          <Title>Settings</Title>
+          <Description>
             No extra props. Opened with <code>settingsDialog.open()</code>.
-          </DialogDescription>
-        </DialogHeader>
-        <components.footer>
+          </Description>
+        </Header>
+        <Footer>
           <Button variant="outline" onClick={() => ctx.close()}>
             Close
           </Button>
@@ -54,8 +60,8 @@ export const settingsDialog = cue.createOverlay((_props, ctx) => {
           >
             Delete Atlas…
           </Button>
-        </components.footer>
-      </DialogContent>
+        </Footer>
+      </Content>
     </Dialog>
   );
 });
@@ -63,47 +69,59 @@ export const settingsDialog = cue.createOverlay((_props, ctx) => {
 export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
 }>((props, ctx) => {
-  const components = ctx.components;
+  const {
+    content: Content,
+    description: Description,
+    footer: Footer,
+    header: Header,
+    title: Title,
+  } = ctx.components;
 
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogHeader>
-          <DialogTitle>Delete {props.organizationName}?</DialogTitle>
-          <DialogDescription>
+      <Content>
+        <Header>
+          <Title>Delete {props.organizationName}?</Title>
+          <Description>
             Typed props, stacked on top of Settings, closed from the overlay itself.
-          </DialogDescription>
-        </DialogHeader>
-        <components.footer>
+          </Description>
+        </Header>
+        <Footer>
           <Button variant="outline" onClick={() => ctx.close()}>
             Cancel
           </Button>
           <Button variant="destructive" onClick={() => ctx.close()}>
             Delete
           </Button>
-        </components.footer>
-      </DialogContent>
+        </Footer>
+      </Content>
     </Dialog>
   );
 });
 
 export const asyncConfirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const components = ctx.components;
+  const {
+    content: Content,
+    description: Description,
+    footer: Footer,
+    header: Header,
+    title: Title,
+  } = ctx.components;
 
   return (
     <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogHeader>
-          <DialogTitle>Confirm</DialogTitle>
-          <DialogDescription>{props.message}</DialogDescription>
-        </DialogHeader>
-        <components.footer>
+      <Content>
+        <Header>
+          <Title>Confirm</Title>
+          <Description>{props.message}</Description>
+        </Header>
+        <Footer>
           <Button variant="outline" onClick={() => ctx.close({ result: false })}>
             Cancel
           </Button>
           <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
-        </components.footer>
-      </DialogContent>
+        </Footer>
+      </Content>
     </Dialog>
   );
 });
