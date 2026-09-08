@@ -209,8 +209,10 @@ describe("createOverlay", () => {
     );
     expect(instances).toHaveLength(2);
 
-    (instances[0]?.props.close as (options?: { result?: boolean }) => void)({ result: true });
-    (instances[1]?.props.close as (options?: { result?: boolean }) => void)({ result: false });
+    const closeFirst = instances[0]?.props.close as (options?: { result?: boolean }) => void;
+    const closeSecond = instances[1]?.props.close as (options?: { result?: boolean }) => void;
+    closeFirst({ result: true });
+    closeSecond({ result: false });
 
     await expect(firstResult).resolves.toBe(true);
     await expect(secondResult).resolves.toBe(false);
