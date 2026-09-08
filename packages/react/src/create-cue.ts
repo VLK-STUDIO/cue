@@ -35,7 +35,7 @@ export function createCue<const C extends CueComponents = {}>(options: CueOption
     render: OverlayRenderer<P, C, R>,
   ): OverlayHandle<P, R> {
     const definition: OverlayDefinition = {
-      render,
+      render: render as OverlayDefinition["render"],
     };
     const pendingResolvers = new Map<string, (result: R | undefined) => void>();
 
@@ -53,9 +53,7 @@ export function createCue<const C extends CueComponents = {}>(options: CueOption
       let instanceId = "";
       const close = (options?: CloseOptions<R>) => closeInstance(instanceId, options);
 
-      instanceId = store.add(definition, props ?? {}, (options) =>
-        close(options as CloseOptions<R>),
-      );
+      instanceId = store.add(definition, props ?? {}, close);
 
       return { instanceId, close };
     }

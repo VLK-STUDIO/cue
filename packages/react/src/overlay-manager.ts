@@ -1,4 +1,4 @@
-import type { CloseOptions, OverlayDefinition } from "./types.js";
+import type { OverlayDefinition } from "./types.js";
 
 export type OverlayInstance = {
   id: string;
@@ -6,7 +6,7 @@ export type OverlayInstance = {
   visible: boolean;
   props: object;
   definition: OverlayDefinition;
-  close: (options?: CloseOptions<unknown>) => void;
+  close: () => void;
 };
 
 export type OverlayStore = ReturnType<typeof createOverlayStore>;
@@ -30,11 +30,7 @@ export function createOverlayStore() {
     };
   }
 
-  function add(
-    definition: OverlayDefinition,
-    props: object,
-    close: (options?: CloseOptions<unknown>) => void,
-  ) {
+  function add(definition: OverlayDefinition, props: object, close: () => void) {
     const id = String(++nextId);
 
     overlays = [

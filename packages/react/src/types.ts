@@ -2,8 +2,12 @@ import type { ComponentType, ReactNode } from "react";
 
 export type CueComponents = Record<string, ComponentType<any>>;
 
+export type CueBackdropCloseOptions = {
+  strategy: "last" | "all";
+};
+
 export type CueBackdrop = ComponentType<{
-  close: (options: { strategy: "last" | "all" }) => void;
+  close: (options: CueBackdropCloseOptions) => void;
 }>;
 
 export type CloseOptions<R = undefined> = {
@@ -30,7 +34,7 @@ export type OverlayRenderer<P extends object = {}, C extends CueComponents = {},
 ) => ReactNode;
 
 export type OverlayDefinition = {
-  render: unknown;
+  render: (props: object, context: OverlayContext<CueComponents, unknown>) => ReactNode;
   /** Reserved for the future per-overlay backdrop option. */
   backdrop?: CueBackdrop | false;
 };
