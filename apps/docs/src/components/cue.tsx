@@ -32,6 +32,7 @@ function CueBackdrop() {
 export const cue = createCue({
   backdrop: CueBackdrop,
   components: {
+    wrapper: Dialog,
     content: CueContent,
     footer: DialogFooter,
     header: DialogHeader,

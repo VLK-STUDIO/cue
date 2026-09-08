@@ -12,22 +12,21 @@ Create one Cue environment and one typed confirm dialog. Any client-side caller 
 ```tsx
 import { cue } from "@/components/cue";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
 
 export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
 }>((props, ctx) => {
-  const { content: Content, title: Title } = ctx.components;
+  const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <Content>
-        <Title>Delete {props.organizationName}?</Title>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Delete {props.organizationName}?</components.title>
         <Button variant="outline" onClick={() => ctx.close()}>
           Cancel
         </Button>
-      </Content>
-    </Dialog>
+      </components.content>
+    </components.wrapper>
   );
 });
 
@@ -46,14 +45,14 @@ The handle is a plain object. `open()` works outside a component.
 
 ```tsx
 export const sessionExpiredDialog = cue.createOverlay((_props, ctx) => {
-  const { content: Content, title: Title } = ctx.components;
+  const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <Content>
-        <Title>Session expired</Title>
-      </Content>
-    </Dialog>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Session expired</components.title>
+      </components.content>
+    </components.wrapper>
   );
 });
 

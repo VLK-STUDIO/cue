@@ -12,6 +12,7 @@ const cue = createCue({
   backdrop: OverlayBackdrop,
   components: {
     wrapper: OverlayWrapper,
+    content: OverlayContent,
     footer: OverlayFooter,
   },
 });
@@ -21,12 +22,16 @@ const cue = createCue({
 
 `backdrop` is different. Cue renders it once for the visible stack. Individual overlays do not render it.
 
-When the backdrop comes from a shadcn Dialog wrapper, use the Dialog content component without its built-in backdrop so the provider remains the only backdrop owner:
+When the backdrop comes from a shadcn Dialog wrapper, configure the Dialog root as `wrapper` and expose a `content` adapter that disables its built-in backdrop. This keeps the provider as the only backdrop owner:
 
 ```tsx
-<Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-  <DialogContent showBackdrop={false}>...</DialogContent>
-</Dialog>
+const components = ctx.components;
+
+return (
+  <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <components.content>...</components.content>
+  </components.wrapper>
+);
 ```
 
 ## `cue.OverlayProvider`
@@ -45,10 +50,12 @@ The provider renders children, every visible overlay, and one shared backdrop wh
 
 ```tsx
 const dialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
+  const components = ctx.components;
+
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>{props.message}</DialogContent>
-    </Dialog>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>{props.message}</components.content>
+    </components.wrapper>
   );
 });
 ```

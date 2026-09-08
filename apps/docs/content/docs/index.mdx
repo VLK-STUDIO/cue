@@ -98,6 +98,7 @@ function CueBackdrop() {
 export const cue = createCue({
   backdrop: CueBackdrop,
   components: {
+    wrapper: Dialog,
     content: CueContent,
     footer: DialogFooter,
     header: DialogHeader,
@@ -157,20 +158,19 @@ The first callback argument contains only values passed to `open()` or `openAsyn
 ```tsx
 import { cue } from "@/components/cue";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
 
 export const settingsDialog = cue.createOverlay((_props, ctx) => {
-  const { content: Content, title: Title } = ctx.components;
+  const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <Content>
-        <Title>Settings</Title>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Settings</components.title>
         <Button variant="outline" onClick={() => ctx.close()}>
           Close
         </Button>
-      </Content>
-    </Dialog>
+      </components.content>
+    </components.wrapper>
   );
 });
 ```
@@ -179,21 +179,21 @@ Use configured components when an overlay needs them:
 
 ```tsx
 const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const { content: Content, footer: Footer, title: Title } = ctx.components;
+  const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <Content>
-        <Title>Confirm</Title>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Confirm</components.title>
         <p>{props.message}</p>
-        <Footer>
+        <components.footer>
           <Button variant="outline" onClick={() => ctx.close({ result: false })}>
             Cancel
           </Button>
           <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
-        </Footer>
-      </Content>
-    </Dialog>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
   );
 });
 ```

@@ -27,15 +27,14 @@ Open Settings, then Delete Atlas to put a confirm dialog on top. Closing the top
 
 ```tsx
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export const settingsDialog = cue.createOverlay((_props, ctx) => {
   const components = ctx.components;
 
   return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <DialogContent showBackdrop={false}>
-        <DialogTitle>Settings</DialogTitle>
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Settings</components.title>
         <components.footer>
           <Button
             onClick={() =>
@@ -47,8 +46,8 @@ export const settingsDialog = cue.createOverlay((_props, ctx) => {
             Delete Atlas…
           </Button>
         </components.footer>
-      </DialogContent>
-    </Dialog>
+      </components.content>
+    </components.wrapper>
   );
 });
 ```

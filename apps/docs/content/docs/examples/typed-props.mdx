@@ -12,22 +12,26 @@ Give `cue.createOverlay()` a props generic. Required keys must be passed to `ope
 
 ```tsx
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { cue } from "@/components/cue";
 
 export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
-}>((props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-    <DialogContent showBackdrop={false}>
-      <DialogTitle>Delete {props.organizationName}?</DialogTitle>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => ctx.close()}>
-          Cancel
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-));
+}>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Delete {props.organizationName}?</components.title>
+        <components.footer>
+          <Button variant="outline" onClick={() => ctx.close()}>
+            Cancel
+          </Button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
 
 confirmDeleteDialog.open({
   organizationName: "Helios",

@@ -25,29 +25,29 @@ if (confirmed) {
 ## Example
 
 ```tsx
+import { cue } from "@/components/cue";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-export const asyncConfirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
-  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-    <DialogContent showBackdrop={false}>
-      <DialogTitle>Confirm</DialogTitle>
-      <DialogDescription>{props.message}</DialogDescription>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => ctx.close({ result: false })}>
-          Cancel
-        </Button>
-        <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-));
+export const asyncConfirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.header>
+          <components.title>Confirm</components.title>
+          <components.description>{props.message}</components.description>
+        </components.header>
+        <components.footer>
+          <Button variant="outline" onClick={() => ctx.close({ result: false })}>
+            Cancel
+          </Button>
+          <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
 
 const confirmed = await asyncConfirmDialog.openAsync({
   message: "Archive this project?",
