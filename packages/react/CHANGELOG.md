@@ -1,5 +1,11 @@
 # @vlkoss/cue
 
+## 0.4.0
+
+### Minor Changes
+
+- [#5](https://github.com/VLK-STUDIO/cue/pull/5) [`92256bf`](https://github.com/VLK-STUDIO/cue/commit/92256bf666fe10a3c24d4b882d1428169e3e3c70) Thanks [@mauroerta](https://github.com/mauroerta)! - Always unmount closed instances after `delay` (drop `unmount: false`). Allow bare `open()` / `openAsync()` when every props key is optional. Stop exporting `OverlayManager` from the public package entry.
+
 ## 0.3.0
 
 ### Minor Changes
