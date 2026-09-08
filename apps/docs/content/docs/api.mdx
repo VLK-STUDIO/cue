@@ -12,12 +12,12 @@ const dialog = createOverlay((props) => <Dialog {...props} />);
 const confirm = createOverlay<{ message: string }, boolean>((props) => <Dialog {...props} />);
 ```
 
-| Method              | Description                                                                                                                                     |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`      | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
-| `close(options?)`   | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
-| `openAsync(props?)` | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
-| `component`         | The component you passed in. Rare. See below.                                                                                                   |
+| Method               | Description                                                                                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`       | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
+| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
+| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
+| `component`          | The component you passed in. Rare. See below.                                                                                                   |
 
 ### Typed props
 
@@ -64,7 +64,7 @@ function ProjectSettings() {
 
 ## `OverlayProvider`
 
-Renders children plus every currently visible overlay. Mount it once near the root.
+Renders children plus every currently visible overlay. Mount it once near the root. Marked `"use client"` for Next.js App Router; see [Getting Started](/docs#nextjs).
 
 ```tsx
 import { OverlayProvider } from "@vlkoss/cue";

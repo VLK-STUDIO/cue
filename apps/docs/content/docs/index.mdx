@@ -64,6 +64,27 @@ export function App() {
 }
 ```
 
+### Next.js
+
+Cue keeps a module-level store and `OverlayProvider` uses `useSyncExternalStore`, so it is client-side. The package marks `OverlayProvider` with `"use client"`, so you can mount it from a Server Component layout:
+
+```tsx
+// app/layout.tsx
+import { OverlayProvider } from "@vlkoss/cue";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <OverlayProvider>{children}</OverlayProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Modules that call `createOverlay` or `open` / `openAsync` still need `"use client"` (or to run those calls from a Client Component).
+
 ## Create an overlay
 
 Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons.

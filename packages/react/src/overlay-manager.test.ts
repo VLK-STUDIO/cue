@@ -218,7 +218,7 @@ describe("createOverlay", () => {
     await expect(secondResult).resolves.toBe(false);
   });
 
-  it("handle close dismisses every instance of that overlay", () => {
+  it("closeAll dismisses every instance of that overlay", () => {
     const confirm = createOverlay(ConfirmDummy);
     confirm.open();
     confirm.open();
@@ -227,7 +227,7 @@ describe("createOverlay", () => {
       OverlayManager.all().filter((item) => item.component === ConfirmDummy && item.open),
     ).toHaveLength(2);
 
-    confirm.close();
+    confirm.closeAll();
 
     expect(
       OverlayManager.all().filter((item) => item.component === ConfirmDummy && item.open),

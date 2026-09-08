@@ -1,3 +1,5 @@
+"use client";
+
 import { useSyncExternalStore } from "react";
 import { OverlayManager } from "./overlay-manager.js";
 

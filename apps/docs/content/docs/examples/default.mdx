@@ -43,4 +43,4 @@ export const settingsDialog = createOverlay((props) => (
 ));
 ```
 
-`createOverlay` returns `{ open, close, openAsync, component }`. `open()` returns that instance's `close`. Keep the handle in a module and call it from event handlers, effects, or other overlays.
+`createOverlay` returns `{ open, closeAll, openAsync, component }`. `open()` returns that instance's `close`. Keep the handle in a module and call it from event handlers, effects, or other overlays.
