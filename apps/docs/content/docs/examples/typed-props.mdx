@@ -3,7 +3,7 @@ title: Typed props
 description: Pass data into an overlay when you open it.
 ---
 
-Give `createOverlay` a props generic. TypeScript then requires those props on `open()`.
+Give `createOverlay` a props generic. Required keys must be passed to `open()`; if every key is optional, bare `open()` is allowed.
 
 <Demo>
   <DemoPreview>

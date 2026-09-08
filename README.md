@@ -84,20 +84,16 @@ confirmDeleteDialog.open({ organizationName: "Atlas" });
 
 Returns `{ open, closeAll, openAsync, component }`.
 
-| Method               | Description                                                                                                                                     |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`       | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
-| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
-| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
-| `component`          | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.        |
+| Method               | Description                                                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`       | Open a new instance. Returns that instance's `close`. Props are required only when the props generic has a required key; all-optional props allow bare `open()`. |
+| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. Always unmounts after `delay` (default 300ms).                            |
+| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`.                  |
+| `component`          | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.                         |
 
 ### `OverlayProvider`
 
 Renders children plus every currently visible overlay. Mount it once near the root.
-
-### `OverlayManager`
-
-The singleton store used by `createOverlay` and `OverlayProvider`. You rarely call this yourself.
 
 ## Docs
 

@@ -12,16 +12,16 @@ const dialog = createOverlay((props) => <Dialog {...props} />);
 const confirm = createOverlay<{ message: string }, boolean>((props) => <Dialog {...props} />);
 ```
 
-| Method               | Description                                                                                                                                     |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`       | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
-| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
-| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
-| `component`          | The component you passed in. Rare. See below.                                                                                                   |
+| Method               | Description                                                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`       | Open a new instance. Returns that instance's `close`. Props are required only when the props generic has a required key; all-optional props allow bare `open()`. |
+| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. Always unmounts after `delay` (default 300ms).                            |
+| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`.                  |
+| `component`          | The component you passed in. Rare. See below.                                                                                                                    |
 
 ### Typed props
 
-Pass a props generic when the overlay needs data at open time:
+Pass a props generic when the overlay needs data at open time. If every key is optional, `open()` with no argument is allowed:
 
 ```tsx
 export const confirmDeleteDialog = createOverlay<{
@@ -80,12 +80,8 @@ import { OverlayProvider } from "@vlkoss/cue";
 type OverlayProps<R = undefined> = {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  close: (options?: { result?: R; unmount?: boolean; delay?: number }) => void;
+  close: (options?: { result?: R; delay?: number }) => void;
 };
 ```
 
-Spread `open` and `onOpenChange` onto your dialog primitive. Call `close` from buttons (pass `{ result }` when you declared a result generic).
-
-## `OverlayManager`
-
-The singleton store used by `createOverlay` and `OverlayProvider`. You rarely call this yourself.
+Spread `open` and `onOpenChange` onto your dialog primitive. Call `close` from buttons (pass `{ result }` when you declared a result generic). Closing always removes the instance after `delay` (default 300ms).

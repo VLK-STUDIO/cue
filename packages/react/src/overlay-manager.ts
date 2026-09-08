@@ -5,9 +5,7 @@ export const OverlayManager = createOverlayManager();
 export type CloseOptions<R = undefined> = {
   /** Value passed to a pending `openAsync` Promise. Omit (or dismiss) to resolve `undefined`. */
   result?: R;
-  /** When `true` (default), remove the instance after `delay`. */
-  unmount?: boolean;
-  /** Milliseconds before unmount. Default `300`. */
+  /** Milliseconds before the instance is removed. Default `300`. */
   delay?: number;
 };
 
@@ -17,6 +15,7 @@ export type OverlayProps<R = undefined> = {
   /**
    * Close this overlay instance.
    * Pass `{ result }` to settle a pending `openAsync` with that value.
+   * The instance always unmounts after `delay` (default 300ms).
    */
   close: (options?: CloseOptions<R>) => void;
 };
@@ -33,16 +32,16 @@ const pendingResolvers = new Map<string, (result: unknown) => void>();
 export function createOverlay<P extends object = {}, R = undefined>(
   component: ComponentType<OverlayProps<R> & P>,
 ) {
-  type OpenProps = keyof P extends never ? [] : [props: P];
+  type OpenProps = {} extends P ? [props?: P] : [props: P];
 
   function settle(instanceId: string, result: R | undefined) {
     pendingResolvers.get(instanceId)?.(result);
     pendingResolvers.delete(instanceId);
   }
 
-  function closeInstance(instanceId: string, { result, ...rest }: CloseOptions<R> = {}) {
+  function closeInstance(instanceId: string, { result, delay }: CloseOptions<R> = {}) {
     settle(instanceId, result);
-    return OverlayManager.close(instanceId, { unmount: true, ...rest });
+    return OverlayManager.close(instanceId, { delay });
   }
 
   function mountInstance(...props: OpenProps) {
@@ -189,20 +188,15 @@ function createOverlayManager() {
     });
   }
 
-  function close(
-    overlayId: string,
-    options: { unmount: boolean; delay?: number } = { unmount: true },
-  ) {
+  function close(overlayId: string, options: { delay?: number } = {}) {
     set(overlayId, {
       open: false,
       visible: true,
     });
 
-    if (options.unmount) {
-      setTimeout(() => {
-        remove(overlayId);
-      }, options?.delay ?? 300);
-    }
+    setTimeout(() => {
+      remove(overlayId);
+    }, options.delay ?? 300);
   }
 
   function all() {
