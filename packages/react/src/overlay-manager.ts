@@ -3,19 +3,33 @@ import type { ComponentType } from "react";
 export const OverlayManager = createOverlayManager();
 
 export type CloseOptions<R = undefined> = {
+  /** Value passed to a pending `openAsync` Promise. Omit (or dismiss) to resolve `undefined`. */
   result?: R;
+  /** When `true` (default), remove the instance after `delay`. */
   unmount?: boolean;
+  /** Milliseconds before unmount. Default `300`. */
   delay?: number;
 };
 
 export type OverlayProps<R = undefined> = {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  /**
+   * Close this overlay instance.
+   * Pass `{ result }` to settle a pending `openAsync` with that value.
+   */
   close: (options?: CloseOptions<R>) => void;
 };
 
 const pendingResolvers = new Map<string, (result: unknown) => void>();
 
+/**
+ * Register an overlay component and get a handle to open instances from anywhere.
+ *
+ * Each `open` / `openAsync` creates a new instance. `closeAll` closes every live
+ * instance from this definition. Instance-specific close comes from `open()`'s
+ * return value or `props.close` inside the component.
+ */
 export function createOverlay<P extends object = {}, R = undefined>(
   component: ComponentType<OverlayProps<R> & P>,
 ) {
@@ -49,10 +63,19 @@ export function createOverlay<P extends object = {}, R = undefined>(
     return { instanceId, close };
   }
 
+  /**
+   * Open a new overlay instance.
+   * Returns a `close` function for that instance only.
+   */
   function open(...props: OpenProps) {
     return mountInstance(...props).close;
   }
 
+  /**
+   * Open a new overlay instance and return a Promise that settles when it closes.
+   * Resolves with `R` when closed via `close({ result })`, otherwise `undefined`.
+   * With no result generic, the Promise is `Promise<undefined>` (wait until closed).
+   */
   function openAsync(...props: OpenProps) {
     return new Promise<R | undefined>((resolve) => {
       const { instanceId } = mountInstance(...props);
@@ -60,7 +83,11 @@ export function createOverlay<P extends object = {}, R = undefined>(
     });
   }
 
-  function close(options: CloseOptions<R> = {}) {
+  /**
+   * Close every live instance created from this overlay definition.
+   * `{ result }` settles every pending `openAsync` with the same value.
+   */
+  function closeAll(options: CloseOptions<R> = {}) {
     const instances = OverlayManager.all().filter(
       (overlay) => overlay.component === component && (overlay.open || overlay.visible),
     );
@@ -72,7 +99,7 @@ export function createOverlay<P extends object = {}, R = undefined>(
 
   return {
     open,
-    close,
+    closeAll,
     openAsync,
     component,
   };
