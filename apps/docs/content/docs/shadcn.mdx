@@ -83,11 +83,11 @@ function CueContent(props: CueContentProps) {
   return <DialogContent {...props} showBackdrop={false} />;
 }
 
-function CueBackdrop() {
+function CueBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
   return (
     <Dialog open>
       <DialogPortal>
-        <DialogOverlay />
+        <DialogOverlay onClick={() => close({ strategy: "last" })} />
       </DialogPortal>
     </Dialog>
   );
@@ -108,7 +108,7 @@ export const cue = createCue({
 });
 ```
 
-The backdrop creates a separate shadcn Dialog root and portal. That gives the native `DialogOverlay` the context it needs while Cue decides when the backdrop mounts. The overlay itself does not render a backdrop.
+The backdrop creates a separate shadcn Dialog root and portal. That gives the native `DialogOverlay` the context it needs while Cue decides when the backdrop mounts. Cue passes the backdrop a `close` callback, and this adapter chooses to close the top open overlay. The overlay itself does not render a backdrop.
 
 ## Use the configured components
 

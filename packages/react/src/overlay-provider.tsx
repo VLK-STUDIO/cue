@@ -42,11 +42,22 @@ function OverlayOutlet<C extends CueComponents>({
   const visible = overlays.filter((overlay) => overlay.visible);
   const openOverlays = visible.filter((overlay) => overlay.open);
   const Backdrop = getBackdrop(openOverlays, backdrop);
+  const topOverlay = openOverlays[openOverlays.length - 1];
+  const closeOverlays = ({ strategy }: { strategy: "last" | "all" }) => {
+    if (strategy === "last") {
+      topOverlay?.close();
+      return;
+    }
+
+    for (const overlay of openOverlays) {
+      overlay.close();
+    }
+  };
 
   return (
     <>
-      {Backdrop && openOverlays.length > 0
-        ? createElement(Backdrop, { key: "cue-backdrop" })
+      {Backdrop && topOverlay
+        ? createElement(Backdrop, { key: "cue-backdrop", close: closeOverlays })
         : null}
       {visible.map((overlay) => (
         <OverlayInstance key={overlay.id} overlay={overlay} components={components} />
@@ -87,7 +98,7 @@ function OverlayInstance<C extends CueComponents>({
   return render(overlay.props, context);
 }
 
-function getBackdrop(visible: { definition: OverlayDefinition }[], defaultBackdrop?: CueBackdrop) {
+function getBackdrop(visible: { definition: OverlayDefinition }[], backdrop?: CueBackdrop) {
   for (let index = visible.length - 1; index >= 0; index -= 1) {
     const override = visible[index]?.definition.backdrop;
 
@@ -96,5 +107,5 @@ function getBackdrop(visible: { definition: OverlayDefinition }[], defaultBackdr
     }
   }
 
-  return defaultBackdrop;
+  return backdrop;
 }

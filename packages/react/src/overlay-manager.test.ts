@@ -186,6 +186,40 @@ describe("shared components", () => {
 });
 
 describe("shared backdrop", () => {
+  it("lets the backdrop choose which instances to close", () => {
+    let closeOverlays: ((options: { strategy: "last" | "all" }) => void) | undefined;
+    function ConfiguredBackdrop({
+      close,
+    }: {
+      close: (options: { strategy: "last" | "all" }) => void;
+    }) {
+      closeOverlays = close;
+      return createElement("div", { "data-cue-backdrop": true });
+    }
+
+    const cue = createCue({ backdrop: ConfiguredBackdrop });
+    const dialog = cue.createOverlay((_props, context) =>
+      createElement("div", { "data-open": context.open }),
+    );
+
+    dialog.open();
+    dialog.open();
+    renderProvider(cue);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
+
+    closeOverlays?.({ strategy: "last" });
+
+    expect(count(renderProvider(cue), 'data-open="false"')).toBe(1);
+    expect(count(renderProvider(cue), 'data-open="true"')).toBe(1);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
+
+    closeOverlays?.({ strategy: "all" });
+
+    expect(count(renderProvider(cue), 'data-open="false"')).toBe(2);
+    expect(count(renderProvider(cue), 'data-open="true"')).toBe(0);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
+  });
+
   it("renders one backdrop for an open stack", () => {
     const cue = createCue({ backdrop: Backdrop });
     const dialog = cue.createOverlay(() => createElement("div", { "data-overlay": true }));

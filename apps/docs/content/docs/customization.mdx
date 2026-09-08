@@ -10,8 +10,14 @@ description: Configure a custom backdrop and reusable components for a Cue envir
 Pass a component through `backdrop`:
 
 ```tsx
-function OverlayBackdrop() {
-  return <div aria-hidden="true" className="fixed inset-0 bg-black/50" />;
+function OverlayBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 bg-black/50"
+      onClick={() => close({ strategy: "last" })}
+    />
+  );
 }
 
 export const cue = createCue({
@@ -22,6 +28,8 @@ export const cue = createCue({
 The backdrop belongs to the provider, not to an individual overlay. The provider renders no backdrop when the stack is empty, one backdrop for one or many visible overlays, and removes it immediately when the final instance starts closing. An overlay can remain mounted during its exit delay without keeping the backdrop visible.
 
 This matters when overlays stack. Rendering a backdrop inside each dialog creates one element per dialog and makes the stack darker as it grows. A provider-level backdrop keeps the stack predictable.
+
+Cue passes a `close` callback to the backdrop. The backdrop chooses whether to close the top open overlay with `{ strategy: "last" }` or every open overlay with `{ strategy: "all" }`.
 
 If a UI library's native backdrop reads a root context, wrap that backdrop in the library's root and portal. The [shadcn integration](/docs/shadcn) uses this pattern for both its Radix and Base UI Dialog wrappers.
 

@@ -19,11 +19,11 @@ function CueContent(props: CueContentProps) {
   return <DialogContent {...props} showBackdrop={false} />;
 }
 
-function CueBackdrop() {
+function CueBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
   return (
     <Dialog open>
       <DialogPortal>
-        <DialogOverlay />
+        <DialogOverlay onClick={() => close({ strategy: "last" })} />
       </DialogPortal>
     </Dialog>
   );

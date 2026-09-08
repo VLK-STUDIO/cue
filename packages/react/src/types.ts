@@ -2,7 +2,9 @@ import type { ComponentType, ReactNode } from "react";
 
 export type CueComponents = Record<string, ComponentType<any>>;
 
-export type CueBackdrop = ComponentType;
+export type CueBackdrop = ComponentType<{
+  close: (options: { strategy: "last" | "all" }) => void;
+}>;
 
 export type CloseOptions<R = undefined> = {
   /** Value passed to a pending `openAsync` Promise. Omit to resolve `undefined`. */

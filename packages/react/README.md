@@ -61,6 +61,8 @@ const cue = createCue({
 
 Cue exposes the configured components through `ctx.components` and leaves composition to each overlay. It renders the configured backdrop once for the visible stack. A UI library backdrop adapter must provide any root or portal context the library requires.
 
+The backdrop receives a `close` callback. Choose `{ strategy: "last" }` to close the top open overlay or `{ strategy: "all" }` to close every open overlay.
+
 Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
 
 Each call to `createCue()` creates an isolated store, provider, definitions, and lifecycle state. The package does not export global `createOverlay`, `OverlayProvider`, or `OverlayManager` values.

@@ -22,6 +22,8 @@ const cue = createCue({
 
 `backdrop` is different. Cue renders it once for the visible stack. Individual overlays do not render it.
 
+The backdrop receives a `close` callback. Call it with `{ strategy: "last" }` to close the top open overlay or `{ strategy: "all" }` to close every open overlay.
+
 For the shadcn Dialog adapter, see [Using Cue with shadcn](/docs/shadcn). For custom backdrops and shared components, see [Customization](/docs/customization).
 
 ## `cue.OverlayProvider`

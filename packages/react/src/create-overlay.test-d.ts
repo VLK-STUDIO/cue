@@ -25,6 +25,16 @@ test("createCue infers the exact application component map", () => {
   });
 });
 
+test("backdrop receives a strategy-based close callback", () => {
+  createCue({
+    backdrop: ({ close }) => {
+      expectTypeOf(close).toEqualTypeOf<(options: { strategy: "last" | "all" }) => void>();
+
+      return null;
+    },
+  });
+});
+
 test("context keeps runtime values out of application props", () => {
   const cue = createCue();
 
