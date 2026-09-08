@@ -61,13 +61,28 @@ describe("OverlayManager", () => {
 
     expect(OverlayManager.all().some((item) => item.id === id)).toBe(false);
   });
+
+  it("closes then removes after a custom delay", () => {
+    const id = OverlayManager.add(Dummy);
+    OverlayManager.open(id, {});
+
+    OverlayManager.close(id, { delay: 50 });
+
+    expect(OverlayManager.all().some((item) => item.id === id)).toBe(true);
+
+    vi.advanceTimersByTime(49);
+    expect(OverlayManager.all().some((item) => item.id === id)).toBe(true);
+
+    vi.advanceTimersByTime(1);
+    expect(OverlayManager.all().some((item) => item.id === id)).toBe(false);
+  });
 });
 
 function ConfirmDummy() {
   return null;
 }
 
-type CloseOptions = { result?: unknown; unmount?: boolean; delay?: number };
+type CloseOptions = { result?: unknown; delay?: number };
 
 describe("createOverlay", () => {
   it("open returns a close that only closes that instance", () => {
@@ -181,7 +196,7 @@ describe("createOverlay", () => {
     await expect(result).resolves.toBeUndefined();
   });
 
-  it("close still accepts unmount options without a result", () => {
+  it("close always unmounts after the delay", () => {
     const confirm = createOverlay(ConfirmDummy);
     const closeInstance = confirm.open();
 
@@ -189,13 +204,13 @@ describe("createOverlay", () => {
       (item) => item.component === ConfirmDummy && item.open,
     )?.id;
 
-    closeInstance({ unmount: false });
+    closeInstance({ delay: 50 });
 
     expect(OverlayManager.all().find((item) => item.id === overlayId)?.open).toBe(false);
     expect(OverlayManager.all().find((item) => item.id === overlayId)?.visible).toBe(true);
 
-    vi.advanceTimersByTime(300);
-    expect(OverlayManager.all().find((item) => item.id === overlayId)?.visible).toBe(true);
+    vi.advanceTimersByTime(50);
+    expect(OverlayManager.all().find((item) => item.id === overlayId)).toBe(undefined);
   });
 
   it("openAsync pending results stay isolated per instance", async () => {
