@@ -1,6 +1,6 @@
-import { createElement, type ComponentType, type ReactNode } from "react";
+import { createElement, type ComponentProps, type ReactNode } from "react";
 import { expectTypeOf, test } from "vitest";
-import { createCue, type CloseOptions, type OverlayContext } from "./index.js";
+import { createCue, type CloseOptions } from "./index.js";
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return createElement("div", null, children);
@@ -15,9 +15,6 @@ test("createCue infers the exact application component map", () => {
 
   cue.createOverlay<{ message: string }, boolean>((props, context) => {
     expectTypeOf(props).toEqualTypeOf<{ message: string }>();
-    expectTypeOf(context).toEqualTypeOf<
-      OverlayContext<{ wrapper: typeof Wrapper; footer: typeof Footer }, boolean>
-    >();
     expectTypeOf(context.components.wrapper).toEqualTypeOf<typeof Wrapper>();
     expectTypeOf(context.components.footer).toEqualTypeOf<typeof Footer>();
 
@@ -72,31 +69,28 @@ test("required props remain required for open and openAsync", () => {
   dialog.open({});
 });
 
-test("result types flow through openAsync and close", () => {
+test("result types flow through openAsync and context close", () => {
   const cue = createCue();
-  const dialog = cue.createOverlay<{}, boolean>(() => null);
+  const dialog = cue.createOverlay<{}, boolean>((_props, context) => {
+    expectTypeOf(context.close).toEqualTypeOf<(options?: CloseOptions<boolean>) => void>();
+
+    context.close({ result: true });
+    // @ts-expect-error result must be boolean
+    context.close({ result: "yes" });
+
+    return null;
+  });
 
   expectTypeOf(dialog.openAsync()).resolves.toEqualTypeOf<boolean | undefined>();
-
-  const close = dialog.open();
-  close({ result: true });
-  // @ts-expect-error result must be boolean
-  close({ result: "yes" });
 });
 
-test("provider overrides use the inferred component map", () => {
-  const alternateFooter: ComponentType<{ children?: ReactNode }> = ({ children }) =>
-    createElement("div", null, children);
+test("provider exposes only its children prop", () => {
   const cue = createCue({ components: { footer: Footer } });
   const Provider = cue.OverlayProvider;
 
-  expectTypeOf<Parameters<typeof Provider>[0]["components"]>().toEqualTypeOf<{
-    footer?: typeof Footer;
+  expectTypeOf<ComponentProps<typeof Provider>>().toEqualTypeOf<{
+    children?: ReactNode;
   }>();
-
-  Provider({ components: { footer: alternateFooter } });
-  // @ts-expect-error provider overrides cannot add application-defined keys
-  Provider({ components: { wrapper: Wrapper } });
 });
 
 test("the package entry exposes only createCue as the creation root", async () => {

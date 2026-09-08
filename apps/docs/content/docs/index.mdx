@@ -1,120 +1,36 @@
 ---
-title: Getting Started
-description: Create an isolated Cue environment and open your first overlay.
+title: Getting started
+description: Create a Cue environment and open your first overlay.
 ---
 
-`@vlkoss/cue` gives your app one overlay environment. Create it once, define overlays from it, and mount its provider near the root.
+Cue starts with one local instance. Create it once, mount its provider, and define overlays from that instance.
 
-## Installation
+## Install
 
 ```npm
 npm i @vlkoss/cue
 ```
 
-### shadcn
+If you use shadcn, use the [Using Cue with shadcn](/docs/shadcn) setup instead.
 
-The [shadcn registry](https://ui.shadcn.com/docs/registry) can add a local Cue configuration and shadcn's Dialog component:
+## Create a Cue
 
-<Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
-  <Tab value="URL">
-
-```npm
-npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
-```
-
-  </Tab>
-  <Tab value="Namespace">
-
-```npm
-npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
-npx shadcn@latest add @cue/cue
-```
-
-  </Tab>
-  <Tab value="GitHub">
-
-```npm
-npx shadcn@latest add VLK-STUDIO/cue/cue
-```
-
-  </Tab>
-</Tabs>
-
-The registry installs shadcn's `dialog` item first, then writes one local `cue` module containing the provider-level backdrop adapter and a typed map of shadcn Dialog components. Change that local configuration to fit the application.
-
-The generated `content` component expects a small change to the local shadcn `DialogContent`. Add a `showBackdrop` prop, default it to `true`, and render `DialogOverlay` conditionally:
+Start with the smallest possible configuration:
 
 ```tsx
-function DialogContent({
-  showBackdrop = true,
-  ...props
-}: DialogPrimitive.Popup.Props & { showBackdrop?: boolean }) {
-  return (
-    <DialogPortal>
-      {showBackdrop && <DialogOverlay />}
-      <DialogPrimitive.Popup {...props} />
-    </DialogPortal>
-  );
-}
-```
+// components/cue.ts
+"use client";
 
-The generated `cue` module then forces `showBackdrop={false}` for every Cue overlay while the provider owns the single shared backdrop.
-
-## Create the Cue environment
-
-```tsx
-// components/cue/index.tsx
-import type { ComponentProps } from "react";
 import { createCue } from "@vlkoss/cue";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
-type CueContentProps = Omit<ComponentProps<typeof DialogContent>, "showBackdrop">;
-
-function CueContent(props: CueContentProps) {
-  return <DialogContent {...props} showBackdrop={false} />;
-}
-
-function CueBackdrop() {
-  return (
-    <Dialog open>
-      <DialogPortal>
-        <DialogOverlay />
-      </DialogPortal>
-    </Dialog>
-  );
-}
-
-export const cue = createCue({
-  backdrop: CueBackdrop,
-  components: {
-    wrapper: Dialog,
-    content: CueContent,
-    footer: DialogFooter,
-    header: DialogHeader,
-    title: DialogTitle,
-    description: DialogDescription,
-    close: DialogClose,
-    trigger: DialogTrigger,
-  },
-});
+export const cue = createCue();
 ```
 
-Each call to `createCue()` owns its own definitions, instances, provider, components, backdrop, and lifecycle state. Two Cue instances never share overlays.
+You now have the Cue instance used to define and open your overlays.
 
-## Add the provider
+## Mount the provider
 
-Mount the provider for that same instance once near the root:
+Mount the provider for that same Cue instance near the root of the app:
 
 ```tsx
 import { cue } from "./components/cue";
@@ -128,11 +44,34 @@ export function App() {
 }
 ```
 
-The provider renders the overlay stack and one shared backdrop while at least one instance is open. It removes the backdrop immediately when the final instance starts closing, then keeps that instance mounted for its exit delay.
+## Define an overlay
 
-### Next.js
+The first callback argument contains only values passed to `open()` or `openAsync()`. Cue runtime values live in the second argument.
 
-Put `createCue()` and overlay definitions in a client-side module. A server layout can render the provider:
+```tsx
+import { cue } from "./components/cue";
+
+export const welcome = cue.createOverlay<{ message: string }>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close()}>
+      Close
+    </button>
+  </div>
+));
+```
+
+Open it from an event handler, effect, or any other client-side code:
+
+```tsx
+welcome.open({ message: "Hello from Cue" });
+```
+
+`open()` returns a close function for that instance. `openAsync()` returns a Promise that resolves when the instance closes.
+
+## Next.js
+
+Put `createCue()` and the overlay definitions in a client-side module. A server layout can render the provider:
 
 ```tsx
 // app/layout.tsx
@@ -149,65 +88,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-`createCue()` and `cue.createOverlay()` do not use hooks and are safe at module scope in client-side modules.
-
-## Create an overlay
-
-The first callback argument contains only values passed to `open()` or `openAsync()`. Cue runtime values are in the second argument.
-
-```tsx
-import { cue } from "@/components/cue";
-import { Button } from "@/components/ui/button";
-
-export const settingsDialog = cue.createOverlay((_props, ctx) => {
-  const components = ctx.components;
-
-  return (
-    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <components.content>
-        <components.title>Settings</components.title>
-        <Button variant="outline" onClick={() => ctx.close()}>
-          Close
-        </Button>
-      </components.content>
-    </components.wrapper>
-  );
-});
-```
-
-Use configured components when an overlay needs them:
-
-```tsx
-const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const components = ctx.components;
-
-  return (
-    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <components.content>
-        <components.title>Confirm</components.title>
-        <p>{props.message}</p>
-        <components.footer>
-          <Button variant="outline" onClick={() => ctx.close({ result: false })}>
-            Cancel
-          </Button>
-          <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
-        </components.footer>
-      </components.content>
-    </components.wrapper>
-  );
-});
-```
-
-## Open it
-
-```tsx
-const close = settingsDialog.open();
-close();
-
-const result = await confirmDialog.openAsync({ message: "Archive this project?" });
-confirmDialog.closeAll();
-```
-
-`open()` returns a close function for that instance. `close({ result })` resolves its matching `openAsync()` call. If every props key is optional, both `open()` and `openAsync()` accept no argument.
-
-For the cases Cue is meant to handle, read [Why Cue](/docs/why).
+`createCue()` and `cue.createOverlay()` do not use hooks, so client-side modules can call them at module scope.

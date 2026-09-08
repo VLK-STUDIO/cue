@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-### Breaking pre-v1 changes
+### Changes
 
 - Replace the global `createOverlay` and `OverlayProvider` exports with isolated `createCue()` instances.
 - Move `open`, `onOpenChange`, `close`, and configured components into the overlay callback context.

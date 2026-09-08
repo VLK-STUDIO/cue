@@ -1,6 +1,6 @@
 # @vlkoss/cue
 
-Imperative React overlays with isolated state, typed application components, and one shared backdrop per Cue environment.
+Imperative React overlays with isolated state and optional shared components and backdrops.
 
 ## Install
 
@@ -8,18 +8,14 @@ Imperative React overlays with isolated state, typed application components, and
 npm i @vlkoss/cue
 ```
 
-## Create a Cue environment
+## Create a Cue
+
+Create one Cue instance in a client-side module:
 
 ```tsx
 import { createCue } from "@vlkoss/cue";
 
-export const cue = createCue({
-  backdrop: OverlayBackdrop,
-  components: {
-    wrapper: OverlayWrapper,
-    footer: OverlayFooter,
-  },
-});
+export const cue = createCue();
 ```
 
 Mount its provider once:
@@ -31,22 +27,14 @@ Mount its provider once:
 Create overlays from that instance. `props` contains only values passed to `open()` or `openAsync()`. Cue-owned values are in the second callback argument.
 
 ```tsx
-const dialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const components = ctx.components;
-
-  return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <components.wrapper>
-        {props.message}
-        <components.footer>
-          <button type="button" onClick={() => ctx.close({ result: true })}>
-            Confirm
-          </button>
-        </components.footer>
-      </components.wrapper>
-    </Dialog>
-  );
-});
+const dialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close({ result: true })}>
+      Confirm
+    </button>
+  </div>
+));
 ```
 
 ```tsx
@@ -57,7 +45,23 @@ dialog.closeAll();
 
 `open()` returns a close function for one instance. `close({ result })` resolves the matching async call. Required props must be passed. If every prop is optional, both methods also accept no argument.
 
-The provider renders the overlay stack and one configured backdrop whenever at least one instance is open. A configured backdrop can be an application adapter around a UI library's native backdrop, but it must provide any context that library requires. Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
+## Configure shared UI
+
+Pass a backdrop or any application-defined component map when you need them:
+
+```tsx
+const cue = createCue({
+  backdrop: OverlayBackdrop,
+  components: {
+    wrapper: OverlayWrapper,
+    footer: OverlayFooter,
+  },
+});
+```
+
+Cue exposes the configured components through `ctx.components` and leaves composition to each overlay. It renders the configured backdrop once for the visible stack. A UI library backdrop adapter must provide any root or portal context the library requires.
+
+Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
 
 Each call to `createCue()` creates an isolated store, provider, definitions, and lifecycle state. The package does not export global `createOverlay`, `OverlayProvider`, or `OverlayManager` values.
 

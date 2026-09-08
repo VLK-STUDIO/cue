@@ -96,7 +96,7 @@ describe("overlay handles", () => {
 
 describe("async overlays", () => {
   it("keeps concurrent results isolated", async () => {
-    const contexts = new Map<string, OverlayContext<{ id: string }, boolean>>();
+    const contexts = new Map<string, OverlayContext<{}, boolean>>();
     const cue = createCue({ backdrop: Backdrop });
     const dialog = cue.createOverlay<{ id: string }, boolean>((props, context) => {
       contexts.set(props.id, context);
@@ -183,28 +183,6 @@ describe("shared components", () => {
       "open",
     ]);
   });
-
-  it("lets the provider override configured components", () => {
-    function AlternateFooter({ children }: { children?: ReactNode }) {
-      return createElement("div", { "data-component": "alternate-footer" }, children);
-    }
-
-    const cue = createCue({ components: { footer: Footer } });
-    const dialog = cue.createOverlay((_props, context) => {
-      const FooterComponent = context.components.footer;
-      return createElement(FooterComponent, null, "Actions");
-    });
-
-    dialog.open();
-    const markup = renderToStaticMarkup(
-      createElement(cue.OverlayProvider, {
-        components: { footer: AlternateFooter },
-      }),
-    );
-
-    expect(markup).toContain('data-component="alternate-footer"');
-    expect(markup).not.toContain('data-component="footer"');
-  });
 });
 
 describe("shared backdrop", () => {
@@ -221,11 +199,19 @@ describe("shared backdrop", () => {
 
   it("keeps the backdrop while a closing instance remains visible", () => {
     const cue = createCue({ backdrop: Backdrop });
-    const dialog = cue.createOverlay(() => null);
+    let renderCount = 0;
+    let closeTop: OverlayContext<{}, undefined>["close"] | undefined;
+    const dialog = cue.createOverlay((_props, context) => {
+      if (renderCount++ === 1) {
+        closeTop = context.close;
+      }
+      return null;
+    });
     dialog.open();
-    const closeTop = dialog.open();
+    dialog.open();
+    renderProvider(cue);
 
-    closeTop({ delay: 50 });
+    closeTop?.({ delay: 50 });
     expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
 
     vi.advanceTimersByTime(50);
@@ -234,10 +220,15 @@ describe("shared backdrop", () => {
 
   it("removes the backdrop when the final instance starts closing", () => {
     const cue = createCue({ backdrop: Backdrop });
-    const dialog = cue.createOverlay(() => null);
-    const close = dialog.open();
+    let close: OverlayContext<{}, undefined>["close"] | undefined;
+    const dialog = cue.createOverlay((_props, context) => {
+      close = context.close;
+      return null;
+    });
+    dialog.open();
+    renderProvider(cue);
 
-    close({ delay: 50 });
+    close?.({ delay: 50 });
     expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
     vi.advanceTimersByTime(50);
     expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);

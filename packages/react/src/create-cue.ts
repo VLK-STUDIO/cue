@@ -27,8 +27,8 @@ type CueOptions<C extends CueComponents> = {
 /** Create an isolated overlay environment with its own provider and lifecycle state. */
 export function createCue<const C extends CueComponents = {}>(options: CueOptions<C> = {}) {
   const store = createOverlayStore();
-  const defaultComponents = (options.components ?? {}) as C;
-  const OverlayProvider = createOverlayProvider(store, defaultComponents, options.backdrop);
+  const components = (options.components ?? {}) as C;
+  const OverlayProvider = createOverlayProvider({ store, components, backdrop: options.backdrop });
 
   /** Create an overlay definition owned by this Cue environment. */
   function createOverlay<P extends object = {}, R = undefined>(

@@ -8,32 +8,17 @@ Cue gives a React app one small, imperative overlay environment. Create it once,
 npm i @vlkoss/cue
 ```
 
-You can also install a local starter configuration through the [shadcn registry](https://ui.shadcn.com/docs/registry):
+## Create a Cue
 
-```sh
-npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
-```
-
-The registry also installs shadcn's `dialog` item and generates one local `cue` module containing the shared Dialog components and a provider-level backdrop built from the local shadcn Dialog wrapper. Add the documented `showBackdrop` prop to the local `DialogContent`; the generated `content` adapter disables that local backdrop so the provider remains the only backdrop owner.
-
-## Usage
-
-Create the Cue environment in a client-side module. Its components are application-defined and inferred from this object.
+Start with no configuration:
 
 ```tsx
 // components/cue.ts
-import { createCue } from "@vlkoss/cue";
-import { OverlayBackdrop } from "./overlay-backdrop";
-import { OverlayFooter } from "./overlay-footer";
-import { OverlayWrapper } from "./overlay-wrapper";
+"use client";
 
-export const cue = createCue({
-  backdrop: OverlayBackdrop,
-  components: {
-    wrapper: OverlayWrapper,
-    footer: OverlayFooter,
-  },
-});
+import { createCue } from "@vlkoss/cue";
+
+export const cue = createCue();
 ```
 
 Mount that instance once:
@@ -50,31 +35,22 @@ export function App() {
 }
 ```
 
-Define overlays from the same instance. Application props and Cue runtime context stay separate.
+Define an overlay from the same instance. The callback receives application props first and Cue runtime context second.
 
 ```tsx
 import { cue } from "./components/cue";
-import { Dialog } from "./dialog";
 
-export const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
-  const components = ctx.components;
-
-  return (
-    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
-      <components.wrapper>
-        <p>{props.message}</p>
-        <components.footer>
-          <button type="button" onClick={() => ctx.close({ result: false })}>
-            Cancel
-          </button>
-          <button type="button" onClick={() => ctx.close({ result: true })}>
-            Confirm
-          </button>
-        </components.footer>
-      </components.wrapper>
-    </Dialog>
-  );
-});
+export const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close({ result: false })}>
+      Cancel
+    </button>
+    <button type="button" onClick={() => ctx.close({ result: true })}>
+      Confirm
+    </button>
+  </div>
+));
 ```
 
 Open it from event handlers, effects, or other client-side code:
@@ -85,9 +61,15 @@ const result = await confirmDialog.openAsync({ message: "Delete this project?" }
 confirmDialog.closeAll();
 ```
 
-`open()` returns a close function for that instance only. `close({ result })` settles the matching `openAsync()` call. Props with only optional keys can be omitted from `open()` and `openAsync()`.
+`open()` returns a close function for that instance. `close({ result })` settles the matching `openAsync()` call. Props with only optional keys can be omitted from `open()` and `openAsync()`.
 
-Cue renders one configured backdrop for the whole open stack. The backdrop disappears as soon as the final open instance starts closing, while that instance remains mounted for its exit delay.
+## Using shadcn
+
+If your app uses shadcn, the [Using Cue with shadcn guide](https://cue.vlkstudio.com/docs/shadcn) explains the registry setup and the native Dialog backdrop adapter.
+
+## Customization
+
+Cue has no backdrop or shared components by default. Add them with `createCue({ backdrop, components })` when your application needs them. See the [Customization guide](https://cue.vlkstudio.com/docs/customization).
 
 ## Next.js
 
@@ -107,10 +89,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 ```
-
-## Breaking pre-v1 change
-
-Cue no longer exports a global `createOverlay`, `OverlayProvider`, or `OverlayManager`. Every overlay belongs to the Cue instance that created it.
 
 ## Docs
 

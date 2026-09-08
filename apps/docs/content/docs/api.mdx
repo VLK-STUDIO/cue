@@ -22,17 +22,7 @@ const cue = createCue({
 
 `backdrop` is different. Cue renders it once for the visible stack. Individual overlays do not render it.
 
-When the backdrop comes from a shadcn Dialog wrapper, configure the Dialog root as `wrapper` and expose a `content` adapter that disables its built-in backdrop. This keeps the provider as the only backdrop owner:
-
-```tsx
-const components = ctx.components;
-
-return (
-  <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
-    <components.content>...</components.content>
-  </components.wrapper>
-);
-```
+For the shadcn Dialog adapter, see [Using Cue with shadcn](/docs/shadcn). For custom backdrops and shared components, see [Customization](/docs/customization).
 
 ## `cue.OverlayProvider`
 
@@ -40,11 +30,7 @@ return (
 <cue.OverlayProvider>{children}</cue.OverlayProvider>
 ```
 
-The provider renders children, every visible overlay, and one shared backdrop while at least one instance is open. An instance remains visible while its close delay runs, but the backdrop disappears as soon as the final instance starts closing. A provider can override configured components for its subtree:
-
-```tsx
-<cue.OverlayProvider components={{ footer: DifferentFooter }}>{children}</cue.OverlayProvider>
-```
+The provider renders children, every visible overlay, and one shared backdrop while at least one instance is open. An instance remains visible while its close delay runs, but the backdrop disappears as soon as the final instance starts closing.
 
 ## `cue.createOverlay<Props, Result>(render)`
 
@@ -107,7 +93,3 @@ confirm.open({ message: "Continue?" });
 ## Shared backdrop behavior
 
 The provider renders no backdrop with no open overlays, one backdrop with one overlay, and still one backdrop for a stack. Closing the top overlay leaves the backdrop while the lower overlay remains. Closing the final instance removes it immediately, while the instance itself remains mounted until its delay expires. `closeAll()` follows the same rule.
-
-## Breaking pre-v1 API change
-
-The package does not export global `createOverlay`, global `OverlayProvider`, or `OverlayManager` values. Create one or more isolated Cue instances instead.

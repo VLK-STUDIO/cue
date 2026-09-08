@@ -1,0 +1,150 @@
+---
+title: Using Cue with shadcn
+description: Install Cue with shadcn and configure its native Dialog backdrop.
+---
+
+The shadcn registry can install the Dialog component and create a local Cue module for your app:
+
+<Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
+  <Tab value="URL">
+
+```npm
+npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
+```
+
+  </Tab>
+  <Tab value="Namespace">
+
+```npm
+npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
+npx shadcn@latest add @cue/cue
+```
+
+  </Tab>
+  <Tab value="GitHub">
+
+```npm
+npx shadcn@latest add VLK-STUDIO/cue/cue
+```
+
+  </Tab>
+</Tabs>
+
+The registry installs shadcn's `dialog` item first, then creates `components/cue/index.tsx`. That file owns the Cue instance, the native backdrop adapter, and the shared Dialog component map. You can edit it like any other application file.
+
+## Allow Cue to own the backdrop
+
+shadcn's `DialogContent` normally renders its own `DialogOverlay`. Cue renders one backdrop for the whole overlay stack, so the local Dialog component needs an opt-out.
+
+Add `showBackdrop` to the existing `DialogContent` props, default it to `true`, and render the existing `DialogOverlay` conditionally:
+
+```tsx
+function DialogContent({
+  showBackdrop = true,
+  ...props
+}: DialogContentProps & { showBackdrop?: boolean }) {
+  return (
+    <DialogPortal>
+      {showBackdrop && <DialogOverlay />}
+      {/* Keep the existing Dialog content or popup here. */}
+    </DialogPortal>
+  );
+}
+```
+
+Keep the rest of shadcn's generated component unchanged. With the Radix-based Dialog, the existing content element is `DialogPrimitive.Content`. With the Base UI Dialog, it is `DialogPrimitive.Popup`.
+
+## The generated Cue module
+
+The generated file adapts the local shadcn components to Cue. `wrapper` is the Dialog root. `content` disables the local backdrop. The remaining keys are ordinary shared components that you can use or replace.
+
+```tsx
+// components/cue/index.tsx
+"use client";
+
+import type { ComponentProps } from "react";
+import { createCue } from "@vlkoss/cue";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+type CueContentProps = Omit<ComponentProps<typeof DialogContent>, "showBackdrop">;
+
+function CueContent(props: CueContentProps) {
+  return <DialogContent {...props} showBackdrop={false} />;
+}
+
+function CueBackdrop() {
+  return (
+    <Dialog open>
+      <DialogPortal>
+        <DialogOverlay />
+      </DialogPortal>
+    </Dialog>
+  );
+}
+
+export const cue = createCue({
+  backdrop: CueBackdrop,
+  components: {
+    wrapper: Dialog,
+    content: CueContent,
+    footer: DialogFooter,
+    header: DialogHeader,
+    title: DialogTitle,
+    description: DialogDescription,
+    close: DialogClose,
+    trigger: DialogTrigger,
+  },
+});
+```
+
+The backdrop creates a separate shadcn Dialog root and portal. That gives the native `DialogOverlay` the context it needs while Cue decides when the backdrop mounts. The overlay itself does not render a backdrop.
+
+## Use the configured components
+
+Every overlay created from this Cue gets the exact component map through `ctx.components`:
+
+```tsx
+import { cue } from "@/components/cue";
+
+export const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.header>
+          <components.title>Confirm</components.title>
+          <components.description>{props.message}</components.description>
+        </components.header>
+        <components.footer>
+          <button type="button" onClick={() => ctx.close({ result: false })}>
+            Cancel
+          </button>
+          <button type="button" onClick={() => ctx.close({ result: true })}>
+            Confirm
+          </button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
+```
+
+Mount the same instance near the app root:
+
+```tsx
+<cue.OverlayProvider>{children}</cue.OverlayProvider>
+```
+
+You can change the generated component map whenever the application needs different shared pieces. Cue does not render those components automatically.
