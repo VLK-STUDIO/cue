@@ -46,9 +46,10 @@ export function OpenAsyncDemo() {
       type="button"
       className="om-button om-button-primary"
       onClick={async () => {
-        await asyncConfirmDialog.openAsync({
+        const confirmed = await asyncConfirmDialog.openAsync({
           message: "Archive this project?",
         });
+        console.log(confirmed);
       }}
     >
       Open async

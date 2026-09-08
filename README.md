@@ -53,7 +53,7 @@ import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props: OverlayProps) => (
   <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => settingsDialog.close()}>
+    <button type="button" onClick={() => props.close()}>
       Close
     </button>
   </Dialog>
@@ -63,7 +63,7 @@ export const settingsDialog = createOverlay((props: OverlayProps) => (
 Open it:
 
 ```tsx
-settingsDialog.open();
+const close = settingsDialog.open();
 ```
 
 Pass a props generic when the overlay needs data at open time:
@@ -76,7 +76,7 @@ export const confirmDeleteDialog = createOverlay<{
 confirmDeleteDialog.open({ organizationName: "Atlas" });
 ```
 
-`OverlayProps` is `{ open, onOpenChange }`. Spread them onto your dialog so Escape and backdrop clicks still close it.
+`OverlayProps` is `{ open, onOpenChange, close }`. Spread `open` and `onOpenChange` onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons. Pass a second generic to `createOverlay` when `openAsync` should return a result (`Promise<R | undefined>`; dismiss is `undefined`).
 
 ## API
 
@@ -84,12 +84,12 @@ confirmDeleteDialog.open({ organizationName: "Atlas" });
 
 Returns `{ open, close, openAsync, component }`.
 
-| Method                        | Description                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `open(props?)`                | Show the overlay. Extra props are required when you pass a props generic.                                                                        |
-| `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
-| `openAsync(props?)`           | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes.                                                         |
-| `component`                   | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.         |
+| Method              | Description                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`      | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
+| `close(options?)`   | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
+| `openAsync(props?)` | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
+| `component`         | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.        |
 
 ### `OverlayProvider`
 

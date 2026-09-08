@@ -1,7 +1,7 @@
 import type { OverlayProps } from "@vlkoss/cue";
 import type { ReactNode } from "react";
 
-type DialogProps = OverlayProps & {
+type DialogProps = Pick<OverlayProps, "open" | "onOpenChange"> & {
   title: string;
   children: ReactNode;
 };

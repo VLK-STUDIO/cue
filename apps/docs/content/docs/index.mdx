@@ -66,7 +66,7 @@ export function App() {
 
 ## Create an overlay
 
-Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it.
+Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons.
 
 ```tsx
 import { createOverlay, type OverlayProps } from "@vlkoss/cue";
@@ -74,7 +74,7 @@ import { Dialog } from "./dialog";
 
 export const settingsDialog = createOverlay((props: OverlayProps) => (
   <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => settingsDialog.close()}>
+    <button type="button" onClick={() => props.close()}>
       Close
     </button>
   </Dialog>
@@ -83,10 +83,10 @@ export const settingsDialog = createOverlay((props: OverlayProps) => (
 
 ## Open it
 
-Call `open()` from anywhere. No local `useState`.
+Call `open()` from anywhere. No local `useState`. It returns that instance's `close` if you need to dismiss it from the caller.
 
 ```tsx
-settingsDialog.open();
+const close = settingsDialog.open();
 ```
 
 <Demo>
