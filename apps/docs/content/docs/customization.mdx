@@ -1,0 +1,78 @@
+---
+title: Customization
+description: Configure a custom backdrop and reusable components for a Cue environment.
+---
+
+`createCue()` needs no options. Add a backdrop or shared components when your overlays need them.
+
+## Custom backdrops
+
+Pass a component through `backdrop`:
+
+```tsx
+function OverlayBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 bg-black/50"
+      onClick={() => close({ strategy: "last" })}
+    />
+  );
+}
+
+export const cue = createCue({
+  backdrop: OverlayBackdrop,
+});
+```
+
+The backdrop belongs to the provider, not to an individual overlay. The provider renders no backdrop when the stack is empty, one backdrop for one or many visible overlays, and removes it immediately when the final instance starts closing. An overlay can remain mounted during its exit delay without keeping the backdrop visible.
+
+This matters when overlays stack. Rendering a backdrop inside each dialog creates one element per dialog and makes the stack darker as it grows. A provider-level backdrop keeps the stack predictable.
+
+Cue passes a `close` callback to the backdrop. The backdrop chooses whether to close the top open overlay with `{ strategy: "last" }` or every open overlay with `{ strategy: "all" }`.
+
+If a UI library's native backdrop reads a root context, wrap that backdrop in the library's root and portal. The [shadcn integration](/docs/shadcn) uses this pattern for both its Radix and Base UI Dialog wrappers.
+
+## Reusable components
+
+The `components` option accepts any application-defined map:
+
+```tsx
+export const cue = createCue({
+  components: {
+    wrapper: OverlayWrapper,
+    footer: OverlayFooter,
+    closeButton: OverlayCloseButton,
+  },
+});
+```
+
+Cue does not decide what those keys mean or render them for you. Each overlay chooses its own composition:
+
+```tsx
+const dialog = cue.createOverlay<{ message: string }>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper>
+      <p>{props.message}</p>
+      <components.footer>
+        <components.closeButton onClick={() => ctx.close()} />
+      </components.footer>
+    </components.wrapper>
+  );
+});
+```
+
+The component keys and their types come from the `createCue()` call. A different Cue instance can use a different map without a global registry or module augmentation.
+
+## Isolated environments
+
+Each Cue owns its own definitions, instances, provider, components, backdrop, and lifecycle state:
+
+```tsx
+const appCue = createCue();
+const adminCue = createCue();
+```
+
+Opening an overlay from `appCue` has no effect on `adminCue`. Use separate instances when different parts of an application need independent overlay stacks.

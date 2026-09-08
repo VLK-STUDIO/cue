@@ -1,9 +1,9 @@
 ---
 title: Default
-description: Register a dialog and open it with no extra props.
+description: Create a Cue environment and open an overlay with no props.
 ---
 
-Create an overlay, then call `open()`.
+Create the Cue environment once, then define an overlay from it:
 
 <Demo>
   <DemoPreview>
@@ -11,36 +11,30 @@ Create an overlay, then call `open()`.
   </DemoPreview>
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
+import { cue } from "@/components/cue";
+import { Button } from "@/components/ui/button";
 
-export const settingsDialog = createOverlay((props) => (
-  <Dialog {...props} title="Settings">
-    <p>No local useState required.</p>
-    <button type="button" onClick={() => props.close()}>
-      Close
-    </button>
-  </Dialog>
-));
+export const settingsDialog = cue.createOverlay((_props, ctx) => {
+  const components = ctx.components;
 
-const close = settingsDialog.open();
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Settings</components.title>
+        <components.description>No local useState required.</components.description>
+        <components.footer>
+          <Button variant="outline" onClick={() => ctx.close()}>
+            Close
+          </Button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
+
+settingsDialog.open();
 ```
 
 </Demo>
 
-## Anatomy
-
-```tsx
-import { createOverlay } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
-
-export const settingsDialog = createOverlay((props) => (
-  <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => props.close()}>
-      Close
-    </button>
-  </Dialog>
-));
-```
-
-`createOverlay` returns `{ open, closeAll, openAsync, component }`. `open()` returns that instance's `close`. Keep the handle in a module and call it from event handlers, effects, or other overlays.
+The same `cue` instance supplies `cue.OverlayProvider` near the app root. `open()` returns the close function for the new instance. `closeAll()` closes every live instance of this overlay definition.

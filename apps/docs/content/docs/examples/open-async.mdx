@@ -3,7 +3,7 @@ title: openAsync
 description: Wait for an overlay result with a Promise.
 ---
 
-`openAsync` opens a new instance and returns a Promise. Declare a result type as the second generic on `createOverlay`. Dismiss (Escape, backdrop, bare `close()`) resolves `undefined`.
+`openAsync()` opens a new instance and returns a Promise. Declare the result type as the second generic on `cue.createOverlay()`. Dismissal, Escape, and a bare `close()` resolve `undefined`.
 
 <Demo>
   <DemoPreview>
@@ -25,16 +25,29 @@ if (confirmed) {
 ## Example
 
 ```tsx
-export const asyncConfirmDialog = createOverlay<{ message: string }, boolean>((props) => (
-  <Dialog {...props} title="Confirm">
-    <button type="button" onClick={() => props.close({ result: false })}>
-      Cancel
-    </button>
-    <button type="button" onClick={() => props.close({ result: true })}>
-      Confirm
-    </button>
-  </Dialog>
-));
+import { cue } from "@/components/cue";
+import { Button } from "@/components/ui/button";
+
+export const asyncConfirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.header>
+          <components.title>Confirm</components.title>
+          <components.description>{props.message}</components.description>
+        </components.header>
+        <components.footer>
+          <Button variant="outline" onClick={() => ctx.close({ result: false })}>
+            Cancel
+          </Button>
+          <Button onClick={() => ctx.close({ result: true })}>Confirm</Button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
 
 const confirmed = await asyncConfirmDialog.openAsync({
   message: "Archive this project?",
@@ -45,14 +58,10 @@ const confirmed = await asyncConfirmDialog.openAsync({
 Any result type works:
 
 ```tsx
-createOverlay<{ title: string }, "one" | "two" | "three">((props) => (
-  <button type="button" onClick={() => props.close({ result: "two" })}>
-    Two
-  </button>
+const dialog = cue.createOverlay<{ title: string }, "one" | "two" | "three">((_props, ctx) => (
+  <Button onClick={() => ctx.close({ result: "two" })}>Two</Button>
 ));
 
 const choice = await dialog.openAsync({ title: "Pick" });
 // Promise<"one" | "two" | "three" | undefined>
 ```
-
-With no result generic, `openAsync` is `Promise<undefined>`: wait until the instance closes, no payload.

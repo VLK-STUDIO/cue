@@ -1,8 +1,6 @@
 # @vlkoss/cue
 
-Register a dialog once. Open it from anywhere.
-
-Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.
+Imperative React overlays with isolated state and optional shared components and backdrops.
 
 ## Install
 
@@ -10,73 +8,68 @@ Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, B
 npm i @vlkoss/cue
 ```
 
-Source install via shadcn: see the [docs](https://cue.vlkstudio.com/docs) or root README.
+## Create a Cue
 
-## Usage
-
-Wrap the tree once:
+Create one Cue instance in a client-side module:
 
 ```tsx
-import { OverlayProvider } from "@vlkoss/cue";
+import { createCue } from "@vlkoss/cue";
 
-export function App() {
-  return (
-    <OverlayProvider>
-      <Page />
-    </OverlayProvider>
-  );
-}
+export const cue = createCue();
 ```
 
-Create an overlay:
+Mount its provider once:
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
+<cue.OverlayProvider>{children}</cue.OverlayProvider>
+```
 
-export const settingsDialog = createOverlay((props: OverlayProps) => (
-  <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => props.close()}>
-      Close
+Create overlays from that instance. `props` contains only values passed to `open()` or `openAsync()`. Cue-owned values are in the second callback argument.
+
+```tsx
+const dialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close({ result: true })}>
+      Confirm
     </button>
-  </Dialog>
+  </div>
 ));
 ```
 
-Open it:
-
 ```tsx
-const close = settingsDialog.open();
+dialog.open({ message: "Continue?" });
+const result = await dialog.openAsync({ message: "Continue?" });
+dialog.closeAll();
 ```
 
-Pass a props generic when the overlay needs data at open time:
+`open()` returns a close function for one instance. `close({ result })` resolves the matching async call. Required props must be passed. If every prop is optional, both methods also accept no argument.
+
+## Configure shared UI
+
+Pass a backdrop or any application-defined component map when you need them:
 
 ```tsx
-export const confirmDeleteDialog = createOverlay<{
-  organizationName: string;
-}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
-
-confirmDeleteDialog.open({ organizationName: "Atlas" });
+const cue = createCue({
+  backdrop: OverlayBackdrop,
+  components: {
+    wrapper: OverlayWrapper,
+    footer: OverlayFooter,
+  },
+});
 ```
 
-`OverlayProps` is `{ open, onOpenChange, close }`. Spread `open` and `onOpenChange` onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons. Pass a second generic to `createOverlay` when `openAsync` should return a result (`Promise<R | undefined>`; dismiss is `undefined`).
+Cue exposes the configured components through `ctx.components` and leaves composition to each overlay. It renders the configured backdrop once for the visible stack. A UI library backdrop adapter must provide any root or portal context the library requires.
 
-## API
+The backdrop receives a `close` callback. Choose `{ strategy: "last" }` to close the top open overlay or `{ strategy: "all" }` to close every open overlay.
 
-### `createOverlay(component)`
+Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
 
-Returns `{ open, closeAll, openAsync, component }`.
+Each call to `createCue()` creates an isolated store, provider, definitions, and lifecycle state. The package does not export global `createOverlay`, `OverlayProvider`, or `OverlayManager` values.
 
-| Method               | Description                                                                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`       | Open a new instance. Returns that instance's `close`. Props are required only when the props generic has a required key; all-optional props allow bare `open()`. |
-| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. Always unmounts after `delay` (default 300ms).                            |
-| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`.                  |
-| `component`          | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.                         |
+## Types
 
-### `OverlayProvider`
-
-Renders children plus every currently visible overlay. Mount it once near the root.
+`OverlayContext<C, R>` contains `open`, `onOpenChange`, `close`, and the exact component map inferred from `createCue({ components })`. `CloseOptions<R>` accepts `result` and `delay`.
 
 ## License
 

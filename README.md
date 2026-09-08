@@ -1,112 +1,103 @@
 # cue
 
-Register a dialog once. Open it from anywhere.
-
-[`@vlkoss/cue`](./packages/react) is an imperative overlay API for React. Define an overlay next to the component it renders, then call `open()` from a click handler, a route effect, or another overlay. No local `useState`.
-
-Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.
+Cue gives a React app one small, imperative overlay environment. Create it once, define overlays from that instance, and mount its provider near the root.
 
 ## Install
-
-npm:
 
 ```sh
 npm i @vlkoss/cue
 ```
 
-Or via the [shadcn registry](https://ui.shadcn.com/docs/registry):
+## Create a Cue
 
-```sh
-npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
-```
-
-```sh
-npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
-npx shadcn@latest add @cue/cue
-```
-
-```sh
-npx shadcn@latest add VLK-STUDIO/cue/cue
-```
-
-## Usage
-
-Wrap the tree once:
+Start with no configuration:
 
 ```tsx
-import { OverlayProvider } from "@vlkoss/cue";
+// components/cue.ts
+"use client";
+
+import { createCue } from "@vlkoss/cue";
+
+export const cue = createCue();
+```
+
+Mount that instance once:
+
+```tsx
+import { cue } from "./components/cue";
 
 export function App() {
   return (
-    <OverlayProvider>
+    <cue.OverlayProvider>
       <Page />
-    </OverlayProvider>
+    </cue.OverlayProvider>
   );
 }
 ```
 
-Create an overlay:
+Define an overlay from the same instance. The callback receives application props first and Cue runtime context second.
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
+import { cue } from "./components/cue";
 
-export const settingsDialog = createOverlay((props: OverlayProps) => (
-  <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => props.close()}>
-      Close
+export const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close({ result: false })}>
+      Cancel
     </button>
-  </Dialog>
+    <button type="button" onClick={() => ctx.close({ result: true })}>
+      Confirm
+    </button>
+  </div>
 ));
 ```
 
-Open it:
+Open it from event handlers, effects, or other client-side code:
 
 ```tsx
-const close = settingsDialog.open();
+const close = confirmDialog.open({ message: "Archive this project?" });
+const result = await confirmDialog.openAsync({ message: "Delete this project?" });
+confirmDialog.closeAll();
 ```
 
-Pass a props generic when the overlay needs data at open time:
+`open()` returns a close function for that instance. `close({ result })` settles the matching `openAsync()` call. Props with only optional keys can be omitted from `open()` and `openAsync()`.
+
+## Using shadcn
+
+If your app uses shadcn, the [Using Cue with shadcn guide](https://cue.vlkstudio.com/docs/shadcn) explains the registry setup and the native Dialog backdrop adapter.
+
+## Customization
+
+Cue has no backdrop or shared components by default. Add them with `createCue({ backdrop, components })` when your application needs them. See the [Customization guide](https://cue.vlkstudio.com/docs/customization).
+
+## Next.js
+
+Put `createCue()` and the overlay definitions in a client-side module. A server layout can render the provider:
 
 ```tsx
-export const confirmDeleteDialog = createOverlay<{
-  organizationName: string;
-}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
+// app/layout.tsx
+import { cue } from "@/components/cue";
 
-confirmDeleteDialog.open({ organizationName: "Atlas" });
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <cue.OverlayProvider>{children}</cue.OverlayProvider>
+      </body>
+    </html>
+  );
+}
 ```
-
-`OverlayProps` is `{ open, onOpenChange, close }`. Spread `open` and `onOpenChange` onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons. Pass a second generic to `createOverlay` when `openAsync` should return a result (`Promise<R | undefined>`; dismiss is `undefined`).
-
-## API
-
-### `createOverlay(component)`
-
-Returns `{ open, closeAll, openAsync, component }`.
-
-| Method               | Description                                                                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`       | Open a new instance. Returns that instance's `close`. Props are required only when the props generic has a required key; all-optional props allow bare `open()`. |
-| `closeAll(options?)` | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. Always unmounts after `delay` (default 300ms).                            |
-| `openAsync(props?)`  | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`.                  |
-| `component`          | The component you passed in. Render it yourself only when the overlay must sit inside a local tree that `OverlayProvider` does not wrap.                         |
-
-### `OverlayProvider`
-
-Renders children plus every currently visible overlay. Mount it once near the root.
 
 ## Docs
 
 [cue.vlkstudio.com](https://cue.vlkstudio.com)
 
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
-
 ## Credits
 
-Docs design stolen from [Emil Kowalski](https://emilkowal.ski/) ([@emilkowalski](https://x.com/emilkowalski)), especially [Sonner](https://sonner.emilkowal.ski/) and [Vaul](https://vaul.emilkowal.ski/).
+Docs design inspired by [Emil Kowalski](https://emilkowal.ski/) ([@emilkowalski](https://x.com/emilkowalski)), especially [Sonner](https://sonner.emilkowal.ski/) and [Vaul](https://vaul.emilkowal.ski/).
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](./packages/react/LICENSE)

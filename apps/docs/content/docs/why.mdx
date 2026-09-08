@@ -1,62 +1,65 @@
 ---
-title: Why cue
-description: Open the same overlay from distant UI, or from code that is not a component.
+title: Why Cue
+description: Open the same overlay from distant UI or from code outside a component.
 ---
 
-Local `useState` is the right tool when a dialog belongs to one screen and the button that opens it sits next to it. Cue is for when the open call lives far from the dialog, or outside React entirely.
+Local state is the right tool when an overlay belongs to one screen and its opener sits next to it. Cue is for an overlay that several parts of an app need to open, or that code outside a component needs to control.
 
 ## One overlay, many callers
 
-Register a confirm dialog once. Open it from a table row, a command palette, a route effect, or another overlay. You do not lift an `open` flag or thread callbacks through the tree.
+Create one Cue environment and one typed confirm overlay. Any client-side caller can open it:
 
 ```tsx
-export const confirmDeleteDialog = createOverlay<{
-  organizationName: string;
-}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
+import { createCue } from "@vlkoss/cue";
+
+export const cue = createCue();
+
+export const confirmDelete = cue.createOverlay<{ organizationName: string }>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>Delete {props.organizationName}?</p>
+    <button type="button" onClick={() => ctx.close()}>
+      Cancel
+    </button>
+  </div>
+));
 
 // table row
-confirmDeleteDialog.open({ organizationName: row.name });
+confirmDelete.open({ organizationName: row.name });
 
 // command palette
-confirmDeleteDialog.open({ organizationName: selected.name });
+confirmDelete.open({ organizationName: selected.name });
 ```
 
-That includes opening from another overlay. They [stack](/docs/examples/stacking).
+The overlay definition stays in one module. Callers only need its handle and the props it accepts.
 
 ## `open()` is not a hook
 
-The handle is a plain object. `open()` works outside a component.
-
-A `queryFn` can live at module scope, hit an endpoint, then open a dialog. Nothing here needs to be a hook.
+The handle is a plain object. `open()` works outside a component:
 
 ```tsx
-export const sessionExpiredDialog = createOverlay((props) => (
-  <Dialog {...props} title="Session expired" />
+export const sessionExpired = cue.createOverlay((_props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>Your session has expired.</p>
+    <button type="button" onClick={() => ctx.close()}>
+      Close
+    </button>
+  </div>
 ));
 
 async function fetchProject(id: string) {
   const response = await api.getProject(id);
 
   if (response.status === 401) {
-    sessionExpiredDialog.open();
+    sessionExpired.open();
     throw new Error("Unauthorized");
   }
 
   return response.data;
 }
-
-export function useProject(id: string) {
-  return useQuery({
-    queryKey: ["project", id],
-    queryFn: () => fetchProject(id),
-  });
-}
 ```
 
-`OverlayProvider` still has to be mounted. Open on a decision in the result, not on every successful fetch.
+The provider still has to be mounted once for that Cue instance. Call `openAsync()` when the caller needs a typed result. Dismissal resolves `undefined`.
 
-[`openAsync`](/docs/examples/open-async) is the same idea when you need to wait. Pass a result generic on `createOverlay` and settle with `props.close({ result })`. Dismiss resolves `undefined`.
+## When not to use Cue
 
-## When not to use cue
-
-If the dialog is owned by one screen and nothing else needs that same instance, keep local state. Cue is extra machinery for a problem you do not have.
+If an overlay belongs to one screen and nothing else needs its instance, keep local state. Cue adds a store and provider for a sharing problem you do not have.

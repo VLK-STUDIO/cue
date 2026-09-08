@@ -1,128 +1,113 @@
-import { assertType, expectTypeOf, test } from "vitest";
-import { createOverlay, type CloseOptions, type OverlayProps } from "./overlay-manager.js";
+import { createElement, type ComponentProps, type ReactNode } from "react";
+import { expectTypeOf, test } from "vitest";
+import { createCue, type CloseOptions } from "./index.js";
 
-// Intentionally untyped props so createOverlay does not infer OverlayProps into P.
-function Dummy() {
-  return null;
+function Wrapper({ children }: { children?: ReactNode }) {
+  return createElement("div", null, children);
 }
 
-test("no props generic: open and openAsync take no required argument", () => {
-  const dialog = createOverlay(Dummy);
+function Footer({ children }: { children?: ReactNode }) {
+  return createElement("footer", null, children);
+}
 
-  expectTypeOf(dialog.open).toBeCallableWith();
-  expectTypeOf(dialog.openAsync).toBeCallableWith();
+test("createCue infers the exact application component map", () => {
+  const cue = createCue({ components: { wrapper: Wrapper, footer: Footer } });
 
-  dialog.open();
-  dialog.openAsync();
+  cue.createOverlay<{ message: string }, boolean>((props, context) => {
+    expectTypeOf(props).toEqualTypeOf<{ message: string }>();
+    expectTypeOf(context.components.wrapper).toEqualTypeOf<typeof Wrapper>();
+    expectTypeOf(context.components.footer).toEqualTypeOf<typeof Footer>();
+
+    // @ts-expect-error ordinary components are application-defined
+    void context.components.header;
+
+    return null;
+  });
 });
 
-test("empty props object: open and openAsync remain optional", () => {
-  const dialog = createOverlay<{}>(Dummy);
+test("backdrop receives a strategy-based close callback", () => {
+  createCue({
+    backdrop: ({ close }) => {
+      expectTypeOf(close).toEqualTypeOf<(options: { strategy: "last" | "all" }) => void>();
 
-  expectTypeOf(dialog.open).toBeCallableWith();
-  expectTypeOf(dialog.openAsync).toBeCallableWith();
-
-  dialog.open();
-  dialog.open({});
-  dialog.openAsync();
-  dialog.openAsync({});
+      return null;
+    },
+  });
 });
 
-test("all-optional props: open() and open({ ... }) both work", () => {
-  const dialog = createOverlay<{ title?: string; subtitle?: string }>(Dummy);
+test("context keeps runtime values out of application props", () => {
+  const cue = createCue();
 
-  expectTypeOf(dialog.open).toBeCallableWith();
-  expectTypeOf(dialog.open).toBeCallableWith({});
-  expectTypeOf(dialog.open).toBeCallableWith({ title: "Hi" });
-  expectTypeOf(dialog.open).toBeCallableWith({ subtitle: "There" });
-  expectTypeOf(dialog.open).toBeCallableWith({ title: "Hi", subtitle: "There" });
+  cue.createOverlay<{ message: string }>((props, context) => {
+    expectTypeOf(props).toEqualTypeOf<{ message: string }>();
+    expectTypeOf(context.open).toBeBoolean();
+    expectTypeOf(context.onOpenChange).toEqualTypeOf<(isOpen: boolean) => void>();
+    expectTypeOf(context.close).toEqualTypeOf<(options?: CloseOptions<undefined>) => void>();
 
-  expectTypeOf(dialog.openAsync).toBeCallableWith();
-  expectTypeOf(dialog.openAsync).toBeCallableWith({ title: "Hi" });
+    // @ts-expect-error Cue runtime values are not application props
+    void props.close;
 
-  dialog.open();
-  dialog.open({});
-  dialog.open({ title: "Hi" });
-  dialog.openAsync();
-  dialog.openAsync({ subtitle: "There" });
+    return null;
+  });
 });
 
-test("required props: open requires the props object", () => {
-  const dialog = createOverlay<{ title: string }>(Dummy);
+test("no props and all-optional props allow bare open and openAsync", () => {
+  const cue = createCue();
+  const noProps = cue.createOverlay(() => null);
+  const optionalProps = cue.createOverlay<{ title?: string }>(() => null);
 
-  expectTypeOf(dialog.open).parameter(0).toEqualTypeOf<{ title: string }>();
-  expectTypeOf(dialog.openAsync).parameter(0).toEqualTypeOf<{ title: string }>();
+  expectTypeOf(noProps.open).toBeCallableWith();
+  expectTypeOf(noProps.openAsync).toBeCallableWith();
+  expectTypeOf(optionalProps.open).toBeCallableWith();
+  expectTypeOf(optionalProps.open).toBeCallableWith({ title: "Hello" });
+  expectTypeOf(optionalProps.openAsync).toBeCallableWith();
+  expectTypeOf(optionalProps.openAsync).toBeCallableWith({ title: "Hello" });
+});
 
-  dialog.open({ title: "Hi" });
-  dialog.openAsync({ title: "Hi" });
+test("required props remain required for open and openAsync", () => {
+  const cue = createCue();
+  const dialog = cue.createOverlay<{ title: string }, boolean>(() => null);
+
+  dialog.open({ title: "Hello" });
+  dialog.openAsync({ title: "Hello" });
 
   // @ts-expect-error required props cannot be omitted
   dialog.open();
   // @ts-expect-error required props cannot be omitted
   dialog.openAsync();
-  // @ts-expect-error empty object is missing title
+  // @ts-expect-error required props cannot be omitted
   dialog.open({});
-  // @ts-expect-error wrong prop type
-  dialog.open({ title: 1 });
 });
 
-test("mixed required and optional props: only required keys are mandatory", () => {
-  const dialog = createOverlay<{ id: string; title?: string }>(Dummy);
+test("result types flow through openAsync and context close", () => {
+  const cue = createCue();
+  const dialog = cue.createOverlay<{}, boolean>((_props, context) => {
+    expectTypeOf(context.close).toEqualTypeOf<(options?: CloseOptions<boolean>) => void>();
 
-  dialog.open({ id: "1" });
-  dialog.open({ id: "1", title: "Hi" });
-  dialog.openAsync({ id: "1" });
+    context.close({ result: true });
+    // @ts-expect-error result must be boolean
+    context.close({ result: "yes" });
 
-  // @ts-expect-error required id cannot be omitted
-  dialog.open();
-  // @ts-expect-error required id cannot be omitted
-  dialog.open({ title: "Hi" });
-  // @ts-expect-error wrong id type
-  dialog.open({ id: 1 });
-});
-
-test("optional props with a result generic still allow bare openAsync", () => {
-  const dialog = createOverlay<{ message?: string }, boolean>(Dummy);
+    return null;
+  });
 
   expectTypeOf(dialog.openAsync()).resolves.toEqualTypeOf<boolean | undefined>();
-
-  dialog.open();
-  dialog.open({ message: "Sure?" });
-  dialog.openAsync();
-  dialog.openAsync({ message: "Sure?" });
 });
 
-test("required props with a result generic still require the props argument", () => {
-  const dialog = createOverlay<{ message: string }, boolean>(Dummy);
+test("provider exposes only its children prop", () => {
+  const cue = createCue({ components: { footer: Footer } });
+  const Provider = cue.OverlayProvider;
 
-  expectTypeOf(dialog.openAsync({ message: "Sure?" })).resolves.toEqualTypeOf<
-    boolean | undefined
-  >();
-
-  // @ts-expect-error required message cannot be omitted
-  dialog.openAsync();
-});
-
-test("CloseOptions only allows result and delay", () => {
-  expectTypeOf<CloseOptions<boolean>>().toEqualTypeOf<{
-    result?: boolean;
-    delay?: number;
+  expectTypeOf<ComponentProps<typeof Provider>>().toEqualTypeOf<{
+    children?: ReactNode;
   }>();
-
-  const props = null as unknown as OverlayProps<boolean>;
-  props.close();
-  props.close({ result: true });
-  props.close({ delay: 0 });
-  props.close({ result: false, delay: 100 });
-
-  // @ts-expect-error unmount is not part of CloseOptions
-  assertType(props.close({ unmount: false }));
 });
 
-test("package entry does not export OverlayManager", async () => {
+test("the package entry exposes only createCue as the creation root", async () => {
   const cue = await import("./index.js");
 
+  expectTypeOf(cue.createCue).toBeFunction();
+  expectTypeOf(cue).not.toHaveProperty("createOverlay");
+  expectTypeOf(cue).not.toHaveProperty("OverlayProvider");
   expectTypeOf(cue).not.toHaveProperty("OverlayManager");
-  expectTypeOf(cue.createOverlay).toBeFunction();
-  expectTypeOf(cue.OverlayProvider).toBeFunction();
 });

@@ -1,2 +1,2 @@
-export { createOverlay, type CloseOptions, type OverlayProps } from "./overlay-manager.js";
-export { OverlayProvider } from "./overlay-provider.js";
+export { createCue } from "./create-cue.js";
+export type { CloseOptions, OverlayContext } from "./types.js";

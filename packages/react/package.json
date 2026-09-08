@@ -1,7 +1,7 @@
 {
   "name": "@vlkoss/cue",
   "version": "0.4.0",
-  "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
+  "description": "Imperative React overlays with isolated Cue environments, typed shared components, and one shared backdrop.",
   "keywords": [
     "dialog",
     "imperative",

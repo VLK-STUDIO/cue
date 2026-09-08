@@ -1,126 +1,91 @@
 ---
-title: Getting Started
-description: Install cue and open your first dialog.
+title: Getting started
+description: Create a Cue environment and open your first overlay.
 ---
 
-`@vlkoss/cue` lets you register a dialog once, then open it from a click handler, a route effect, or another overlay.
+Cue starts with one local instance. Create it once, mount its provider, and define overlays from that instance.
 
-## Installation
+## Install
 
 ```npm
 npm i @vlkoss/cue
 ```
 
-### shadcn
+If you use shadcn, use the [Using Cue with shadcn](/docs/shadcn) setup instead.
 
-If you prefer, install cue from the [shadcn registry](https://ui.shadcn.com/docs/registry). That adds `@vlkoss/cue` and a local re-export you can wrap. Pick one:
+## Create a Cue
 
-<Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
-  <Tab value="URL">
-
-```npm
-npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
-```
-
-  </Tab>
-  <Tab value="Namespace">
-
-Register the registry once. `{name}` is a URL template the CLI fills with the item name (`cue` → `…/r/cue.json`):
-
-```npm
-npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
-npx shadcn@latest add @cue/cue
-```
-
-  </Tab>
-  <Tab value="GitHub">
-
-```npm
-npx shadcn@latest add VLK-STUDIO/cue/cue
-```
-
-  </Tab>
-</Tabs>
-
-<Callout type="info">
-  With the registry install, import from `@/lib/cue` (or whatever `aliases.lib` resolves to). That
-  file re-exports `@vlkoss/cue`, so you can wrap or extend the API in one place without forking the
-  package.
-</Callout>
-
-## Add the provider
-
-Render `OverlayProvider` once near the root of your app.
+Start with the smallest possible configuration:
 
 ```tsx
-import { OverlayProvider } from "@vlkoss/cue";
+// components/cue.ts
+"use client";
+
+import { createCue } from "@vlkoss/cue";
+
+export const cue = createCue();
+```
+
+You now have the Cue instance used to define and open your overlays.
+
+## Mount the provider
+
+Mount the provider for that same Cue instance near the root of the app:
+
+```tsx
+import { cue } from "./components/cue";
 
 export function App() {
   return (
-    <OverlayProvider>
+    <cue.OverlayProvider>
       <Page />
-    </OverlayProvider>
+    </cue.OverlayProvider>
   );
 }
 ```
 
-### Next.js
+## Define an overlay
 
-Cue keeps a module-level store and `OverlayProvider` uses `useSyncExternalStore`, so it is client-side. The package marks `OverlayProvider` with `"use client"`, so you can mount it from a Server Component layout:
+The first callback argument contains only values passed to `open()` or `openAsync()`. Cue runtime values live in the second argument.
+
+```tsx
+import { cue } from "./components/cue";
+
+export const welcome = cue.createOverlay<{ message: string }>((props, ctx) => (
+  <div role="dialog" aria-hidden={!ctx.open}>
+    <p>{props.message}</p>
+    <button type="button" onClick={() => ctx.close()}>
+      Close
+    </button>
+  </div>
+));
+```
+
+Open it from an event handler, effect, or any other client-side code:
+
+```tsx
+welcome.open({ message: "Hello from Cue" });
+```
+
+`open()` returns a close function for that instance. `openAsync()` returns a Promise that resolves when the instance closes.
+
+## Next.js
+
+Put `createCue()` and the overlay definitions in a client-side module. A server layout can render the provider:
 
 ```tsx
 // app/layout.tsx
-import { OverlayProvider } from "@vlkoss/cue";
+import { cue } from "@/components/cue";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <OverlayProvider>{children}</OverlayProvider>
+        <cue.OverlayProvider>{children}</cue.OverlayProvider>
       </body>
     </html>
   );
 }
 ```
 
-Modules that call `createOverlay` or `open` / `openAsync` still need `"use client"` (or to run those calls from a Client Component).
-
-## Create an overlay
-
-Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons.
-
-```tsx
-import { createOverlay, type OverlayProps } from "@vlkoss/cue";
-import { Dialog } from "./dialog";
-
-export const settingsDialog = createOverlay((props: OverlayProps) => (
-  <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => props.close()}>
-      Close
-    </button>
-  </Dialog>
-));
-```
-
-## Open it
-
-Call `open()` from anywhere. No local `useState`. It returns that instance's `close` if you need to dismiss it from the caller.
-
-```tsx
-const close = settingsDialog.open();
-```
-
-<Demo>
-  <DemoPreview>
-    <WelcomeDemo />
-  </DemoPreview>
-
-```tsx
-welcomeDialog.open();
-```
-
-</Demo>
-
-Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.
-
-If you want the cases this is for, read [Why cue](/docs/why).
+`createCue()` and `cue.createOverlay()` do not use hooks, so client-side modules can call them at module scope.

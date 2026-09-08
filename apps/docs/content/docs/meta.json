@@ -1,3 +1,15 @@
 {
-  "pages": ["---Basics---", "index", "why", "---API---", "api", "---Examples---", "...examples"]
+  "pages": [
+    "---Basics---",
+    "index",
+    "why",
+    "---Integrations---",
+    "shadcn",
+    "---Customization---",
+    "customization",
+    "---API---",
+    "api",
+    "---Examples---",
+    "...examples"
+  ]
 }

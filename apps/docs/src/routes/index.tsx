@@ -15,7 +15,9 @@ function Home() {
       <div className="om-landing">
         <LogoMark className="om-logo om-logo-hero" />
         <h1 className="om-landing-title">{appName}</h1>
-        <p className="om-landing-tagline">Register a dialog once. Open it from anywhere.</p>
+        <p className="om-landing-tagline">
+          Create one Cue environment. Open overlays from anywhere.
+        </p>
         <div className="om-landing-actions">
           <button
             type="button"

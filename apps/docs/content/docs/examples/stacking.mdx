@@ -3,7 +3,7 @@ title: Stacking
 description: Open an overlay from another overlay.
 ---
 
-Overlays stack. Open one from inside another without setting up a portal.
+Overlays stack inside one Cue environment. The provider renders one backdrop for the whole stack.
 
 <Demo>
   <DemoPreview>
@@ -21,25 +21,33 @@ confirmDeleteDialog.open({
 
 </Demo>
 
-Open **Settings**, then **Delete Atlas…** to put a confirm dialog on top.
+Open Settings, then Delete Atlas to put a confirm dialog on top. Closing the top instance leaves the lower instance and shared backdrop visible.
 
 ## Example
 
 ```tsx
-export const settingsDialog = createOverlay((props) => (
-  <Dialog {...props} title="Settings">
-    <button
-      type="button"
-      onClick={() =>
-        confirmDeleteDialog.open({
-          organizationName: "Atlas",
-        })
-      }
-    >
-      Delete Atlas…
-    </button>
-  </Dialog>
-));
-```
+import { Button } from "@/components/ui/button";
 
-Each overlay is managed on its own. Closing the top one leaves the one underneath open.
+export const settingsDialog = cue.createOverlay((_props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <components.wrapper open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      <components.content>
+        <components.title>Settings</components.title>
+        <components.footer>
+          <Button
+            onClick={() =>
+              confirmDeleteDialog.open({
+                organizationName: "Atlas",
+              })
+            }
+          >
+            Delete Atlas…
+          </Button>
+        </components.footer>
+      </components.content>
+    </components.wrapper>
+  );
+});
+```

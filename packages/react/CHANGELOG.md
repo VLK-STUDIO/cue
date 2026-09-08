@@ -1,5 +1,15 @@
 # @vlkoss/cue
 
+## Unreleased
+
+### Changes
+
+- Replace the global `createOverlay` and `OverlayProvider` exports with isolated `createCue()` instances.
+- Move `open`, `onOpenChange`, `close`, and configured components into the overlay callback context.
+- Add Cue-level shared backdrops and application-defined typed shared components.
+- Remove the `unmount: false` option. Closed instances always unmount after their delay.
+- Keep `OverlayManager` internal.
+
 ## 0.4.0
 
 ### Minor Changes
