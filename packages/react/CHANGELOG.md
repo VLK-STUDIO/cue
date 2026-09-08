@@ -1,5 +1,11 @@
 # @vlkoss/cue
 
+## 0.3.0
+
+### Minor Changes
+
+- [#3](https://github.com/VLK-STUDIO/cue/pull/3) [`262eeb5`](https://github.com/VLK-STUDIO/cue/commit/262eeb51957070390e1c278dd0db828e9175fa0f) Thanks [@mauroerta](https://github.com/mauroerta)! - Rename handle `close` to `closeAll` so definition-level close-all is obvious next to instance `close`. Add JSDoc on `createOverlay` and its methods. Mark `OverlayProvider` with `"use client"` and document Next.js App Router usage.
+
 ## 0.2.0
 
 ### Minor Changes

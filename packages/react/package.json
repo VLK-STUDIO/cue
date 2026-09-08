@@ -1,6 +1,6 @@
 {
   "name": "@vlkoss/cue",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
   "keywords": [
     "dialog",
