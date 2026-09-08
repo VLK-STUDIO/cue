@@ -1,9 +1,9 @@
 ---
 title: Typed props
-description: Pass data into an overlay when you open it.
+description: Pass application data into an overlay when you open it.
 ---
 
-Give `createOverlay` a props generic. Required keys must be passed to `open()`; if every key is optional, bare `open()` is allowed.
+Give `cue.createOverlay()` a props generic. Required keys must be passed to `open()`; if every key is optional, bare `open()` is allowed.
 
 <Demo>
   <DemoPreview>
@@ -11,11 +11,15 @@ Give `createOverlay` a props generic. Required keys must be passed to `open()`; 
   </DemoPreview>
 
 ```tsx
-export const confirmDeleteDialog = createOverlay<{
+export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
-}>((props) => (
-  <Dialog {...props} title={`Delete ${props.organizationName}?`}>
-    <button type="button" onClick={() => props.close()}>
+}>((props, ctx) => (
+  <Dialog
+    open={ctx.open}
+    onOpenChange={ctx.onOpenChange}
+    title={`Delete ${props.organizationName}?`}
+  >
+    <button type="button" onClick={() => ctx.close()}>
       Cancel
     </button>
   </Dialog>
@@ -28,22 +32,4 @@ confirmDeleteDialog.open({
 
 </Demo>
 
-## Example
-
-```tsx
-export const confirmDeleteDialog = createOverlay<{
-  organizationName: string;
-}>((props) => (
-  <Dialog {...props} title={`Delete ${props.organizationName}?`}>
-    <button type="button" onClick={() => props.close()}>
-      Cancel
-    </button>
-  </Dialog>
-));
-
-confirmDeleteDialog.open({
-  organizationName: "Helios",
-});
-```
-
-`OverlayProps` (`open`, `onOpenChange`, `close`) are always injected. Your generic only describes the extra fields.
+The props generic describes only values supplied at open time. `open`, `onOpenChange`, `close`, and `components` come from the second callback argument.

@@ -1,18 +1,30 @@
 ---
-title: Why cue
-description: Open the same overlay from distant UI, or from code that is not a component.
+title: Why Cue
+description: Open the same overlay from distant UI or from code outside a component.
 ---
 
-Local `useState` is the right tool when a dialog belongs to one screen and the button that opens it sits next to it. Cue is for when the open call lives far from the dialog, or outside React entirely.
+Local `useState` is the right tool when a dialog belongs to one screen and its opener sits next to it. Cue is for an overlay shared by distant UI or opened by code outside a component.
 
 ## One overlay, many callers
 
-Register a confirm dialog once. Open it from a table row, a command palette, a route effect, or another overlay. You do not lift an `open` flag or thread callbacks through the tree.
+Create one Cue environment and one typed confirm dialog. Any client-side caller can open it:
 
 ```tsx
-export const confirmDeleteDialog = createOverlay<{
+export const cue = createCue();
+
+export const confirmDeleteDialog = cue.createOverlay<{
   organizationName: string;
-}>((props) => <Dialog {...props} title={`Delete ${props.organizationName}?`} />);
+}>((props, ctx) => (
+  <Dialog
+    open={ctx.open}
+    onOpenChange={ctx.onOpenChange}
+    title={`Delete ${props.organizationName}?`}
+  >
+    <button type="button" onClick={() => ctx.close()}>
+      Cancel
+    </button>
+  </Dialog>
+));
 
 // table row
 confirmDeleteDialog.open({ organizationName: row.name });
@@ -21,17 +33,15 @@ confirmDeleteDialog.open({ organizationName: row.name });
 confirmDeleteDialog.open({ organizationName: selected.name });
 ```
 
-That includes opening from another overlay. They [stack](/docs/examples/stacking).
+Opening from another overlay uses the same Cue instance, so the provider keeps both instances in one visible stack.
 
 ## `open()` is not a hook
 
 The handle is a plain object. `open()` works outside a component.
 
-A `queryFn` can live at module scope, hit an endpoint, then open a dialog. Nothing here needs to be a hook.
-
 ```tsx
-export const sessionExpiredDialog = createOverlay((props) => (
-  <Dialog {...props} title="Session expired" />
+export const sessionExpiredDialog = cue.createOverlay((_props, ctx) => (
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange} title="Session expired" />
 ));
 
 async function fetchProject(id: string) {
@@ -44,19 +54,10 @@ async function fetchProject(id: string) {
 
   return response.data;
 }
-
-export function useProject(id: string) {
-  return useQuery({
-    queryKey: ["project", id],
-    queryFn: () => fetchProject(id),
-  });
-}
 ```
 
-`OverlayProvider` still has to be mounted. Open on a decision in the result, not on every successful fetch.
+`cue.OverlayProvider` still has to be mounted. Call `openAsync()` when the caller needs a typed result. Dismissal resolves `undefined`.
 
-[`openAsync`](/docs/examples/open-async) is the same idea when you need to wait. Pass a result generic on `createOverlay` and settle with `props.close({ result })`. Dismiss resolves `undefined`.
+## When not to use Cue
 
-## When not to use cue
-
-If the dialog is owned by one screen and nothing else needs that same instance, keep local state. Cue is extra machinery for a problem you do not have.
+If the dialog belongs to one screen and nothing else needs that instance, keep local state. Cue adds a store and provider for a sharing problem you do not have.

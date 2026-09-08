@@ -1,9 +1,9 @@
 ---
 title: Getting Started
-description: Install cue and open your first dialog.
+description: Create an isolated Cue environment and open your first overlay.
 ---
 
-`@vlkoss/cue` lets you register a dialog once, then open it from a click handler, a route effect, or another overlay.
+`@vlkoss/cue` gives your app one overlay environment. Create it once, define overlays from it, and mount its provider near the root.
 
 ## Installation
 
@@ -13,7 +13,7 @@ npm i @vlkoss/cue
 
 ### shadcn
 
-If you prefer, install cue from the [shadcn registry](https://ui.shadcn.com/docs/registry). That adds `@vlkoss/cue` and a local re-export you can wrap. Pick one:
+The [shadcn registry](https://ui.shadcn.com/docs/registry) can add a local Cue configuration and shadcn's Dialog component:
 
 <Tabs items={["URL", "Namespace", "GitHub"]} groupId="shadcn-install" persist>
   <Tab value="URL">
@@ -24,8 +24,6 @@ npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
 
   </Tab>
   <Tab value="Namespace">
-
-Register the registry once. `{name}` is a URL template the CLI fills with the item name (`cue` → `…/r/cue.json`):
 
 ```npm
 npx shadcn@latest registry add @cue=https://cue.vlkstudio.com/r/{name}.json
@@ -42,85 +40,114 @@ npx shadcn@latest add VLK-STUDIO/cue/cue
   </Tab>
 </Tabs>
 
-<Callout type="info">
-  With the registry install, import from `@/lib/cue` (or whatever `aliases.lib` resolves to). That
-  file re-exports `@vlkoss/cue`, so you can wrap or extend the API in one place without forking the
-  package.
-</Callout>
+The registry installs shadcn's `dialog` item first, then writes a local `cue` module and a small provider-level backdrop adapter. The generated Cue module uses shadcn's `DialogFooter` as its default shared component. Change the local configuration to fit the application.
+
+## Create the Cue environment
+
+```tsx
+// components/cue/index.ts
+import { createCue } from "@vlkoss/cue";
+import { DialogFooter } from "@/components/ui/dialog";
+import { CueBackdrop } from "./cue-backdrop";
+
+export const cue = createCue({
+  backdrop: CueBackdrop,
+  components: {
+    footer: DialogFooter,
+  },
+});
+```
+
+Each call to `createCue()` owns its own definitions, instances, provider, components, backdrop, and lifecycle state. Two Cue instances never share overlays.
 
 ## Add the provider
 
-Render `OverlayProvider` once near the root of your app.
+Mount the provider for that same instance once near the root:
 
 ```tsx
-import { OverlayProvider } from "@vlkoss/cue";
+import { cue } from "./components/cue";
 
 export function App() {
   return (
-    <OverlayProvider>
+    <cue.OverlayProvider>
       <Page />
-    </OverlayProvider>
+    </cue.OverlayProvider>
   );
 }
 ```
 
+The provider renders the overlay stack and one shared backdrop while at least one instance is open. It removes the backdrop immediately when the final instance starts closing, then keeps that instance mounted for its exit delay.
+
 ### Next.js
 
-Cue keeps a module-level store and `OverlayProvider` uses `useSyncExternalStore`, so it is client-side. The package marks `OverlayProvider` with `"use client"`, so you can mount it from a Server Component layout:
+Put `createCue()` and overlay definitions in a client-side module. A server layout can render the provider:
 
 ```tsx
 // app/layout.tsx
-import { OverlayProvider } from "@vlkoss/cue";
+import { cue } from "@/components/cue";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <OverlayProvider>{children}</OverlayProvider>
+        <cue.OverlayProvider>{children}</cue.OverlayProvider>
       </body>
     </html>
   );
 }
 ```
 
-Modules that call `createOverlay` or `open` / `openAsync` still need `"use client"` (or to run those calls from a Client Component).
+`createCue()` and `cue.createOverlay()` do not use hooks and are safe at module scope in client-side modules.
 
 ## Create an overlay
 
-Define the overlay next to the component it renders. Spread `OverlayProps` (`open`, `onOpenChange`) onto your dialog so Escape and backdrop clicks still close it. Call `props.close()` from buttons.
+The first callback argument contains only values passed to `open()` or `openAsync()`. Cue runtime values are in the second argument.
 
 ```tsx
-import { createOverlay, type OverlayProps } from "@vlkoss/cue";
+import { cue } from "@/components/cue";
 import { Dialog } from "./dialog";
 
-export const settingsDialog = createOverlay((props: OverlayProps) => (
-  <Dialog {...props} title="Settings">
-    <button type="button" onClick={() => props.close()}>
+export const settingsDialog = cue.createOverlay((_props, ctx) => (
+  <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+    <button type="button" onClick={() => ctx.close()}>
       Close
     </button>
   </Dialog>
 ));
 ```
 
-## Open it
+Use configured components when an overlay needs them:
 
-Call `open()` from anywhere. No local `useState`. It returns that instance's `close` if you need to dismiss it from the caller.
+```tsx
+const confirmDialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
+  const components = ctx.components;
+
+  return (
+    <Dialog open={ctx.open} onOpenChange={ctx.onOpenChange}>
+      {props.message}
+      <components.footer>
+        <button type="button" onClick={() => ctx.close({ result: false })}>
+          Cancel
+        </button>
+        <button type="button" onClick={() => ctx.close({ result: true })}>
+          Confirm
+        </button>
+      </components.footer>
+    </Dialog>
+  );
+});
+```
+
+## Open it
 
 ```tsx
 const close = settingsDialog.open();
+close();
+
+const result = await confirmDialog.openAsync({ message: "Archive this project?" });
+confirmDialog.closeAll();
 ```
 
-<Demo>
-  <DemoPreview>
-    <WelcomeDemo />
-  </DemoPreview>
+`open()` returns a close function for that instance. `close({ result })` resolves its matching `openAsync()` call. If every props key is optional, both `open()` and `openAsync()` accept no argument.
 
-```tsx
-welcomeDialog.open();
-```
-
-</Demo>
-
-Works with any component that accepts `open` and `onOpenChange`: Radix Dialog, Base UI, vaul, or your own.
-
-If you want the cases this is for, read [Why cue](/docs/why).
+For the cases Cue is meant to handle, read [Why Cue](/docs/why).

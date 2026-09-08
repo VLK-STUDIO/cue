@@ -86,7 +86,7 @@ You must be logged in to npm (`npm login`) with publish rights.
 
 ## shadcn registry
 
-Single source of truth: `registry.json` plus `registry/cue.ts` (a re-export of `@vlkoss/cue`). That powers:
+Single source of truth: `registry.json` plus the files under `registry/`. The Cue registry item requires shadcn's `dialog` item, uses its `DialogFooter`, and includes a small provider-level backdrop adapter. That powers:
 
 - GitHub installs: `npx shadcn@latest add VLK-STUDIO/cue/cue`
 - Hosted installs after docs build: `https://cue.vlkstudio.com/r/cue.json`

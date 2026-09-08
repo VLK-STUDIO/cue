@@ -1,36 +1,106 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { OverlayManager } from "./overlay-manager.js";
+import { createElement, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
+import type { OverlayStore } from "./overlay-manager.js";
+import type { CueBackdrop, CueComponents, OverlayContext, OverlayDefinition } from "./types.js";
 
-export function OverlayProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      {children}
-      <OverlayOutlet />
-    </>
-  );
+export type OverlayProviderProps<C extends CueComponents> = {
+  children?: ReactNode;
+  components?: Partial<C>;
+};
+
+export function createOverlayProvider<C extends CueComponents>(
+  store: OverlayStore,
+  defaultComponents: C,
+  defaultBackdrop?: CueBackdrop,
+): ComponentType<OverlayProviderProps<C>> {
+  function OverlayProvider({ children, components }: OverlayProviderProps<C>) {
+    const resolvedComponents = {
+      ...defaultComponents,
+      ...components,
+    } as C;
+
+    return (
+      <>
+        {children}
+        <OverlayOutlet
+          store={store}
+          components={resolvedComponents}
+          defaultBackdrop={defaultBackdrop}
+        />
+      </>
+    );
+  }
+
+  return OverlayProvider;
 }
 
-function OverlayOutlet() {
-  const overlays = useOverlays();
+function OverlayOutlet<C extends CueComponents>({
+  store,
+  components,
+  defaultBackdrop,
+}: {
+  store: OverlayStore;
+  components: C;
+  defaultBackdrop?: CueBackdrop;
+}) {
+  const overlays = useSyncExternalStore(store.subscribe, store.all, store.all);
   const visible = overlays.filter((overlay) => overlay.visible);
+  const openOverlays = visible.filter((overlay) => overlay.open);
+  const Backdrop = getBackdrop(openOverlays, defaultBackdrop);
 
   return (
     <>
+      {Backdrop && openOverlays.length > 0
+        ? createElement(Backdrop, { key: "cue-backdrop" })
+        : null}
       {visible.map((overlay) => (
-        <overlay.component key={overlay.id} {...overlay.props} open={overlay.open} />
+        <OverlayInstance key={overlay.id} overlay={overlay} components={components} />
       ))}
     </>
   );
 }
 
-function useOverlays() {
-  const overlays = useSyncExternalStore(
-    OverlayManager.subscribe,
-    OverlayManager.all,
-    OverlayManager.all,
-  );
+function OverlayInstance<C extends CueComponents>({
+  overlay,
+  components,
+}: {
+  overlay: {
+    id: string;
+    open: boolean;
+    props: object;
+    definition: OverlayDefinition;
+    close: (options?: { result?: unknown; delay?: number }) => void;
+  };
+  components: C;
+}) {
+  const context: OverlayContext<C, unknown> = {
+    open: overlay.open,
+    onOpenChange(isOpen) {
+      if (!isOpen) {
+        overlay.close();
+      }
+    },
+    close: overlay.close,
+    components,
+  };
 
-  return overlays;
+  const render = overlay.definition.render as (
+    props: object,
+    context: OverlayContext<C, unknown>,
+  ) => ReactNode;
+
+  return render(overlay.props, context);
+}
+
+function getBackdrop(visible: { definition: OverlayDefinition }[], defaultBackdrop?: CueBackdrop) {
+  for (let index = visible.length - 1; index >= 0; index -= 1) {
+    const override = visible[index]?.definition.backdrop;
+
+    if (override !== undefined) {
+      return override || undefined;
+    }
+  }
+
+  return defaultBackdrop;
 }

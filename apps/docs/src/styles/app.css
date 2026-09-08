@@ -164,24 +164,26 @@ html > body[data-scroll-locked] {
 }
 
 /* Dialog */
-.om-dialog-backdrop {
+.om-cue-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100;
+  background: rgb(0 0 0 / 0.45);
+  opacity: 1;
+  transition: opacity 200ms var(--om-ease-out);
+}
+
+.om-dialog-surface {
+  position: fixed;
+  inset: 0;
+  z-index: 101;
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background: rgb(0 0 0 / 0);
-  opacity: 0;
   pointer-events: none;
-  transition:
-    opacity 200ms var(--om-ease-out),
-    background 200ms var(--om-ease-out);
 }
 
-.om-dialog-backdrop.is-open {
-  background: rgb(0 0 0 / 0.45);
-  opacity: 1;
+.om-dialog-surface.is-open {
   pointer-events: auto;
 }
 
@@ -200,7 +202,7 @@ html > body[data-scroll-locked] {
     opacity 220ms var(--om-ease-out);
 }
 
-.om-dialog-backdrop.is-open .om-dialog-panel {
+.om-dialog-surface.is-open .om-dialog-panel {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -234,7 +236,8 @@ html > body[data-scroll-locked] {
 @media (prefers-reduced-motion: reduce) {
   .om-button,
   .om-landing-docs,
-  .om-dialog-backdrop,
+  .om-cue-backdrop,
+  .om-dialog-surface,
   .om-dialog-panel {
     transition: none;
   }

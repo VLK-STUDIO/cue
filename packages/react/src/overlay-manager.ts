@@ -1,118 +1,18 @@
-import type { ComponentType } from "react";
+import type { CloseOptions, OverlayDefinition } from "./types.js";
 
-export const OverlayManager = createOverlayManager();
-
-export type CloseOptions<R = undefined> = {
-  /** Value passed to a pending `openAsync` Promise. Omit (or dismiss) to resolve `undefined`. */
-  result?: R;
-  /** Milliseconds before the instance is removed. Default `300`. */
-  delay?: number;
-};
-
-export type OverlayProps<R = undefined> = {
+export type OverlayInstance = {
+  id: string;
   open: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  /**
-   * Close this overlay instance.
-   * Pass `{ result }` to settle a pending `openAsync` with that value.
-   * The instance always unmounts after `delay` (default 300ms).
-   */
-  close: (options?: CloseOptions<R>) => void;
+  visible: boolean;
+  props: object;
+  definition: OverlayDefinition;
+  close: (options?: CloseOptions<unknown>) => void;
 };
 
-const pendingResolvers = new Map<string, (result: unknown) => void>();
+export type OverlayStore = ReturnType<typeof createOverlayStore>;
 
-/**
- * Register an overlay component and get a handle to open instances from anywhere.
- *
- * Each `open` / `openAsync` creates a new instance. `closeAll` closes every live
- * instance from this definition. Instance-specific close comes from `open()`'s
- * return value or `props.close` inside the component.
- */
-export function createOverlay<P extends object = {}, R = undefined>(
-  component: ComponentType<OverlayProps<R> & P>,
-) {
-  type OpenProps = {} extends P ? [props?: P] : [props: P];
-
-  function settle(instanceId: string, result: R | undefined) {
-    pendingResolvers.get(instanceId)?.(result);
-    pendingResolvers.delete(instanceId);
-  }
-
-  function closeInstance(instanceId: string, { result, delay }: CloseOptions<R> = {}) {
-    settle(instanceId, result);
-    return OverlayManager.close(instanceId, { delay });
-  }
-
-  function mountInstance(...props: OpenProps) {
-    const instanceId = OverlayManager.add(component as ComponentType<Partial<OverlayProps>>);
-
-    const close = (options?: CloseOptions<R>) => closeInstance(instanceId, options);
-
-    OverlayManager.open(instanceId, {
-      ...(props[0] as object | undefined),
-      close,
-      onOpenChange(isOpen: boolean) {
-        if (!isOpen) {
-          close();
-        }
-      },
-    });
-
-    return { instanceId, close };
-  }
-
-  /**
-   * Open a new overlay instance.
-   * Returns a `close` function for that instance only.
-   */
-  function open(...props: OpenProps) {
-    return mountInstance(...props).close;
-  }
-
-  /**
-   * Open a new overlay instance and return a Promise that settles when it closes.
-   * Resolves with `R` when closed via `close({ result })`, otherwise `undefined`.
-   * With no result generic, the Promise is `Promise<undefined>` (wait until closed).
-   */
-  function openAsync(...props: OpenProps) {
-    return new Promise<R | undefined>((resolve) => {
-      const { instanceId } = mountInstance(...props);
-      pendingResolvers.set(instanceId, resolve as (result: unknown) => void);
-    });
-  }
-
-  /**
-   * Close every live instance created from this overlay definition.
-   * `{ result }` settles every pending `openAsync` with the same value.
-   */
-  function closeAll(options: CloseOptions<R> = {}) {
-    const instances = OverlayManager.all().filter(
-      (overlay) => overlay.component === component && (overlay.open || overlay.visible),
-    );
-
-    for (const instance of instances) {
-      closeInstance(instance.id, options);
-    }
-  }
-
-  return {
-    open,
-    closeAll,
-    openAsync,
-    component,
-  };
-}
-
-function createOverlayManager() {
-  let overlays: {
-    id: string;
-    open: boolean;
-    visible: boolean;
-    props: Record<string, unknown>;
-    component: ComponentType<Partial<OverlayProps>>;
-  }[] = [];
-
+export function createOverlayStore() {
+  let overlays: OverlayInstance[] = [];
   let nextId = 0;
   const listeners = new Set<() => void>();
 
@@ -130,73 +30,57 @@ function createOverlayManager() {
     };
   }
 
-  function add(component: ComponentType<Partial<OverlayProps>>) {
-    const overlayId = String(++nextId);
+  function add(
+    definition: OverlayDefinition,
+    props: object,
+    close: (options?: CloseOptions<unknown>) => void,
+  ) {
+    const id = String(++nextId);
 
-    overlays.push({
-      id: overlayId,
-      open: false,
-      visible: false,
-      props: {},
-      component,
-    });
-
+    overlays = [
+      ...overlays,
+      {
+        id,
+        open: true,
+        visible: true,
+        props,
+        definition,
+        close,
+      },
+    ];
     notify();
 
-    return overlayId;
+    return id;
   }
 
-  function set(
-    overlayId: string,
-    options: {
-      open: boolean;
-      visible: boolean;
-      props?: Record<string, unknown>;
-    },
-  ) {
-    const overlay = overlays.find((overlay) => overlay.id === overlayId);
-
-    if (!overlay) {
+  function remove(id: string) {
+    if (!overlays.some((overlay) => overlay.id === id)) {
       return;
     }
 
-    overlays = overlays.map((overlay) => {
-      if (overlay.id === overlayId) {
-        return {
-          ...overlay,
-          ...options,
-          component: overlay.component,
-        };
-      }
-
-      return overlay;
-    });
-
+    overlays = overlays.filter((overlay) => overlay.id !== id);
     notify();
   }
 
-  function remove(overlayId: string) {
-    overlays = overlays.filter((overlay) => overlay.id !== overlayId);
+  function close(id: string, { delay = 300 }: { delay?: number } = {}) {
+    const overlay = overlays.find((item) => item.id === id);
+
+    if (!overlay || !overlay.open) {
+      return;
+    }
+
+    overlays = overlays.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            open: false,
+            visible: true,
+          }
+        : item,
+    );
     notify();
-  }
 
-  function open<P extends Record<string, unknown>>(overlayId: string, props: P) {
-    set(overlayId, {
-      open: true,
-      visible: true,
-      props,
-    });
-  }
-
-  function close(overlayId: string, options: { delay?: number } = {}) {
-    set(overlayId, {
-      open: false,
-      visible: true,
-    });
-
-    setTimeout(() => {
-      remove(overlayId);
-    }, options.delay ?? 300);
+    setTimeout(() => remove(id), delay);
   }
 
   function all() {
@@ -206,7 +90,6 @@ function createOverlayManager() {
   return {
     add,
     all,
-    open,
     close,
     subscribe,
   };

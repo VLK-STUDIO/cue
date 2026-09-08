@@ -1,8 +1,18 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { OverlayManager, createOverlay } from "./overlay-manager.js";
+import { createCue, type OverlayContext } from "./index.js";
 
-function Dummy() {
-  return null;
+function Backdrop() {
+  return createElement("div", { "data-cue-backdrop": true });
+}
+
+function renderProvider(cue: ReturnType<typeof createCue>) {
+  return renderToStaticMarkup(createElement(cue.OverlayProvider));
+}
+
+function count(markup: string, marker: string) {
+  return markup.split(marker).length - 1;
 }
 
 beforeEach(() => {
@@ -10,242 +20,238 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.clearAllTimers();
   vi.useRealTimers();
 });
 
-describe("OverlayManager", () => {
-  it("assigns a distinct id to each overlay", () => {
-    const first = OverlayManager.add(Dummy);
-    const second = OverlayManager.add(Dummy);
+describe("Cue isolation", () => {
+  it("keeps independently created Cue instances isolated", () => {
+    const a = createCue({ backdrop: Backdrop });
+    const b = createCue({ backdrop: Backdrop });
+    const aOverlay = a.createOverlay(() => createElement("div", { "data-overlay": "a" }));
+    const bOverlay = b.createOverlay(() => createElement("div", { "data-overlay": "b" }));
 
-    expect(first).not.toBe(second);
-  });
+    aOverlay.open();
 
-  it("registers an overlay as closed and hidden", () => {
-    const id = OverlayManager.add(Dummy);
+    expect(renderProvider(a)).toContain('data-overlay="a"');
+    expect(renderProvider(b)).not.toContain("data-overlay");
 
-    expect(OverlayManager.all().some((overlay) => overlay.id === id)).toBe(true);
-
-    const overlay = OverlayManager.all().find((item) => item.id === id);
-    expect(overlay?.open).toBe(false);
-    expect(overlay?.visible).toBe(false);
-  });
-
-  it("opens an overlay and notifies subscribers", () => {
-    const id = OverlayManager.add(Dummy);
-    const listener = vi.fn();
-    const unsubscribe = OverlayManager.subscribe(listener);
-
-    OverlayManager.open(id, { title: "Hello" });
-
-    const overlay = OverlayManager.all().find((item) => item.id === id);
-    expect(overlay?.open).toBe(true);
-    expect(overlay?.visible).toBe(true);
-    expect(overlay?.props).toMatchObject({ title: "Hello" });
-    expect(listener).toHaveBeenCalled();
-
-    unsubscribe();
-  });
-
-  it("closes then removes after the default delay", () => {
-    const id = OverlayManager.add(Dummy);
-    OverlayManager.open(id, {});
-
-    OverlayManager.close(id);
-
-    let overlay = OverlayManager.all().find((item) => item.id === id);
-    expect(overlay?.open).toBe(false);
-    expect(overlay?.visible).toBe(true);
-
-    vi.advanceTimersByTime(300);
-
-    expect(OverlayManager.all().some((item) => item.id === id)).toBe(false);
-  });
-
-  it("closes then removes after a custom delay", () => {
-    const id = OverlayManager.add(Dummy);
-    OverlayManager.open(id, {});
-
-    OverlayManager.close(id, { delay: 50 });
-
-    expect(OverlayManager.all().some((item) => item.id === id)).toBe(true);
-
-    vi.advanceTimersByTime(49);
-    expect(OverlayManager.all().some((item) => item.id === id)).toBe(true);
-
-    vi.advanceTimersByTime(1);
-    expect(OverlayManager.all().some((item) => item.id === id)).toBe(false);
+    bOverlay.open();
+    expect(renderProvider(a)).not.toContain('data-overlay="b"');
+    expect(renderProvider(b)).toContain('data-overlay="b"');
   });
 });
 
-function ConfirmDummy() {
-  return null;
-}
+describe("overlay handles", () => {
+  it("keeps each returned close function bound to one instance", () => {
+    const cue = createCue();
+    const dialog = cue.createOverlay<{ id: string }>((props, context) =>
+      createElement("div", {
+        "data-overlay-id": props.id,
+        "data-open": context.open,
+      }),
+    );
 
-type CloseOptions = { result?: unknown; delay?: number };
-
-describe("createOverlay", () => {
-  it("open returns a close that only closes that instance", () => {
-    const confirm = createOverlay(ConfirmDummy);
-
-    const closeFirst = confirm.open();
-    const closeSecond = confirm.open();
-
-    const openIds = OverlayManager.all()
-      .filter((item) => item.component === ConfirmDummy && item.open)
-      .map((item) => item.id);
-
-    expect(openIds).toHaveLength(2);
-
+    const closeFirst = dialog.open({ id: "first" });
+    dialog.open({ id: "second" });
     closeFirst();
 
-    const stillOpen = OverlayManager.all().filter(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    expect(stillOpen).toHaveLength(1);
-
-    closeSecond();
-    expect(
-      OverlayManager.all().filter((item) => item.component === ConfirmDummy && item.open),
-    ).toHaveLength(0);
+    const markup = renderProvider(cue);
+    expect(markup).toContain('data-overlay-id="first" data-open="false"');
+    expect(markup).toContain('data-overlay-id="second" data-open="true"');
   });
 
-  it("opens with typed props and closes through onOpenChange", () => {
-    const confirm = createOverlay<{ name: string }>(ConfirmDummy);
+  it("closes an instance through onOpenChange", () => {
+    let context: OverlayContext<{}, undefined> | undefined;
+    const cue = createCue();
+    const dialog = cue.createOverlay((_props, nextContext) => {
+      context = nextContext;
+      return null;
+    });
 
-    confirm.open({ name: "Atlas" });
+    dialog.open();
+    renderProvider(cue);
+    context?.onOpenChange(false);
 
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    expect(overlay?.props).toMatchObject({ name: "Atlas" });
-
-    const onOpenChange = overlay?.props.onOpenChange as (open: boolean) => void;
-    onOpenChange(false);
-
-    expect(OverlayManager.all().find((item) => item.component === ConfirmDummy && item.open)).toBe(
-      undefined,
-    );
+    expect(renderProvider(cue)).toBe("");
+    vi.advanceTimersByTime(300);
+    expect(renderProvider(cue)).toBe("");
   });
 
-  it("injects close into overlay props", () => {
-    const confirm = createOverlay(ConfirmDummy);
-    confirm.open();
-
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
+  it("closeAll closes every instance from one overlay definition", () => {
+    const cue = createCue();
+    const dialog = cue.createOverlay((_props, context) =>
+      createElement("div", { "data-open": context.open }),
     );
-    const close = overlay?.props.close as (options?: CloseOptions) => void;
 
-    close();
+    dialog.open();
+    dialog.open();
+    dialog.closeAll();
 
-    expect(OverlayManager.all().find((item) => item.component === ConfirmDummy && item.open)).toBe(
-      undefined,
-    );
+    expect(count(renderProvider(cue), 'data-open="false"')).toBe(2);
+    vi.advanceTimersByTime(300);
+    expect(renderProvider(cue)).not.toContain("data-open");
+  });
+});
+
+describe("async overlays", () => {
+  it("keeps concurrent results isolated", async () => {
+    const contexts = new Map<string, OverlayContext<{ id: string }, boolean>>();
+    const cue = createCue({ backdrop: Backdrop });
+    const dialog = cue.createOverlay<{ id: string }, boolean>((props, context) => {
+      contexts.set(props.id, context);
+      return createElement("div", { "data-overlay-id": props.id });
+    });
+
+    const first = dialog.openAsync({ id: "first" });
+    const second = dialog.openAsync({ id: "second" });
+    renderProvider(cue);
+
+    contexts.get("first")?.close({ result: true });
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
+    contexts.get("second")?.close({ result: false });
+
+    await expect(first).resolves.toBe(true);
+    await expect(second).resolves.toBe(false);
   });
 
-  it("openAsync resolves undefined when no result type is declared", async () => {
-    const confirm = createOverlay(ConfirmDummy);
-    const result = confirm.openAsync();
+  it("settles every pending result through closeAll", async () => {
+    const cue = createCue();
+    const dialog = cue.createOverlay<{}, string>(() => null);
+    const first = dialog.openAsync();
+    const second = dialog.openAsync();
 
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    const close = overlay?.props.close as (options?: CloseOptions) => void;
-    close();
+    dialog.closeAll({ result: "dismissed" });
+
+    await expect(first).resolves.toBe("dismissed");
+    await expect(second).resolves.toBe("dismissed");
+  });
+
+  it("resolves dismissals as undefined", async () => {
+    let context: OverlayContext<{}, boolean> | undefined;
+    const cue = createCue();
+    const dialog = cue.createOverlay<{}, boolean>((_props, nextContext) => {
+      context = nextContext;
+      return null;
+    });
+
+    const result = dialog.openAsync();
+    renderProvider(cue);
+    context?.onOpenChange(false);
 
     await expect(result).resolves.toBeUndefined();
   });
+});
 
-  it("openAsync resolves undefined when dismissed through onOpenChange", async () => {
-    const confirm = createOverlay(ConfirmDummy);
-    const result = confirm.openAsync();
+describe("shared components", () => {
+  function Wrapper({ children }: { children?: ReactNode }) {
+    return createElement("section", { "data-component": "wrapper" }, children);
+  }
 
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    const onOpenChange = overlay?.props.onOpenChange as (open: boolean) => void;
-    onOpenChange(false);
+  function Footer({ children }: { children?: ReactNode }) {
+    return createElement("footer", { "data-component": "footer" }, children);
+  }
 
-    await expect(result).resolves.toBeUndefined();
+  it("passes configured components through context without merging them into props", () => {
+    const seenProps: object[] = [];
+    const seenContexts: object[] = [];
+    const cue = createCue({ components: { wrapper: Wrapper, footer: Footer } });
+    const dialog = cue.createOverlay<{ message: string }>((props, context) => {
+      seenProps.push(props);
+      seenContexts.push(context);
+      const WrapperComponent = context.components.wrapper;
+      const FooterComponent = context.components.footer;
+
+      return createElement(
+        WrapperComponent,
+        null,
+        props.message,
+        createElement(FooterComponent, null, "Actions"),
+      );
+    });
+
+    dialog.open({ message: "Hello" });
+    const markup = renderProvider(cue);
+
+    expect(markup).toContain('data-component="wrapper"');
+    expect(markup).toContain('data-component="footer"');
+    expect(seenProps[0]).toEqual({ message: "Hello" });
+    expect(Object.keys(seenContexts[0] ?? {}).sort()).toEqual([
+      "close",
+      "components",
+      "onOpenChange",
+      "open",
+    ]);
   });
 
-  it("openAsync resolves the declared result type", async () => {
-    const confirm = createOverlay<{ title: string }, "one" | "two">(ConfirmDummy);
-    const result = confirm.openAsync({ title: "Pick" });
+  it("lets the provider override configured components", () => {
+    function AlternateFooter({ children }: { children?: ReactNode }) {
+      return createElement("div", { "data-component": "alternate-footer" }, children);
+    }
 
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
+    const cue = createCue({ components: { footer: Footer } });
+    const dialog = cue.createOverlay((_props, context) => {
+      const FooterComponent = context.components.footer;
+      return createElement(FooterComponent, null, "Actions");
+    });
+
+    dialog.open();
+    const markup = renderToStaticMarkup(
+      createElement(cue.OverlayProvider, {
+        components: { footer: AlternateFooter },
+      }),
     );
-    const close = overlay?.props.close as (options?: { result?: "one" | "two" }) => void;
-    close({ result: "one" });
 
-    await expect(result).resolves.toBe("one");
+    expect(markup).toContain('data-component="alternate-footer"');
+    expect(markup).not.toContain('data-component="footer"');
+  });
+});
+
+describe("shared backdrop", () => {
+  it("renders one backdrop for an open stack", () => {
+    const cue = createCue({ backdrop: Backdrop });
+    const dialog = cue.createOverlay(() => createElement("div", { "data-overlay": true }));
+
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
+    dialog.open();
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
+    dialog.open();
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
   });
 
-  it("openAsync resolves undefined on dismiss when a result type is declared", async () => {
-    const confirm = createOverlay<{}, "one" | "two">(ConfirmDummy);
-    const result = confirm.openAsync();
+  it("keeps the backdrop while a closing instance remains visible", () => {
+    const cue = createCue({ backdrop: Backdrop });
+    const dialog = cue.createOverlay(() => null);
+    dialog.open();
+    const closeTop = dialog.open();
 
-    const overlay = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    const onOpenChange = overlay?.props.onOpenChange as (open: boolean) => void;
-    onOpenChange(false);
-
-    await expect(result).resolves.toBeUndefined();
-  });
-
-  it("close always unmounts after the delay", () => {
-    const confirm = createOverlay(ConfirmDummy);
-    const closeInstance = confirm.open();
-
-    const overlayId = OverlayManager.all().find(
-      (item) => item.component === ConfirmDummy && item.open,
-    )?.id;
-
-    closeInstance({ delay: 50 });
-
-    expect(OverlayManager.all().find((item) => item.id === overlayId)?.open).toBe(false);
-    expect(OverlayManager.all().find((item) => item.id === overlayId)?.visible).toBe(true);
+    closeTop({ delay: 50 });
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
 
     vi.advanceTimersByTime(50);
-    expect(OverlayManager.all().find((item) => item.id === overlayId)).toBe(undefined);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(1);
   });
 
-  it("openAsync pending results stay isolated per instance", async () => {
-    const confirm = createOverlay<{}, boolean>(ConfirmDummy);
+  it("removes the backdrop when the final instance starts closing", () => {
+    const cue = createCue({ backdrop: Backdrop });
+    const dialog = cue.createOverlay(() => null);
+    const close = dialog.open();
 
-    const firstResult = confirm.openAsync();
-    const secondResult = confirm.openAsync();
-
-    const instances = OverlayManager.all().filter(
-      (item) => item.component === ConfirmDummy && item.open,
-    );
-    expect(instances).toHaveLength(2);
-
-    const closeFirst = instances[0]?.props.close as (options?: { result?: boolean }) => void;
-    const closeSecond = instances[1]?.props.close as (options?: { result?: boolean }) => void;
-    closeFirst({ result: true });
-    closeSecond({ result: false });
-
-    await expect(firstResult).resolves.toBe(true);
-    await expect(secondResult).resolves.toBe(false);
+    close({ delay: 50 });
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
+    vi.advanceTimersByTime(50);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
   });
 
-  it("closeAll dismisses every instance of that overlay", () => {
-    const confirm = createOverlay(ConfirmDummy);
-    confirm.open();
-    confirm.open();
+  it("removes the backdrop when closeAll starts closing the final instances", () => {
+    const cue = createCue({ backdrop: Backdrop });
+    const dialog = cue.createOverlay(() => null);
+    dialog.open();
+    dialog.open();
 
-    expect(
-      OverlayManager.all().filter((item) => item.component === ConfirmDummy && item.open),
-    ).toHaveLength(2);
-
-    confirm.closeAll();
-
-    expect(
-      OverlayManager.all().filter((item) => item.component === ConfirmDummy && item.open),
-    ).toHaveLength(0);
+    dialog.closeAll({ delay: 25 });
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
+    vi.advanceTimersByTime(25);
+    expect(count(renderProvider(cue), "data-cue-backdrop")).toBe(0);
   });
 });

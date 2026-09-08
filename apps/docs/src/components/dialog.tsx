@@ -1,7 +1,8 @@
-import type { OverlayProps } from "@vlkoss/cue";
 import type { ReactNode } from "react";
 
-type DialogProps = Pick<OverlayProps, "open" | "onOpenChange"> & {
+type DialogProps = {
+  open: boolean;
+  onOpenChange: (isOpen: boolean) => void;
   title: string;
   children: ReactNode;
 };
@@ -9,7 +10,7 @@ type DialogProps = Pick<OverlayProps, "open" | "onOpenChange"> & {
 export function Dialog({ open, onOpenChange, title, children }: DialogProps) {
   return (
     <div
-      className={open ? "om-dialog-backdrop is-open" : "om-dialog-backdrop"}
+      className={open ? "om-dialog-surface is-open" : "om-dialog-surface"}
       onClick={() => onOpenChange(false)}
     >
       <div

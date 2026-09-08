@@ -7,16 +7,22 @@
       "name": "cue",
       "type": "registry:lib",
       "title": "Cue",
-      "description": "Imperative React overlay manager. Register a dialog once, open it from anywhere.",
+      "description": "Imperative React overlays with isolated Cue environments, typed shared components, and one shared backdrop.",
       "dependencies": ["@vlkoss/cue"],
+      "registryDependencies": ["dialog"],
       "files": [
         {
           "path": "registry/cue.ts",
           "type": "registry:lib",
-          "target": "@lib/cue.ts"
+          "target": "@/components/cue/index.ts"
+        },
+        {
+          "path": "registry/cue-backdrop.tsx",
+          "type": "registry:component",
+          "target": "@/components/cue/cue-backdrop.tsx"
         }
       ],
-      "docs": "Wrap your app in OverlayProvider, then createOverlay(...) next to the dialog it renders. https://cue.vlkstudio.com/docs"
+      "docs": "Install a local Cue configuration with shadcn Dialog and create overlays with cue.createOverlay(...). https://cue.vlkstudio.com/docs"
     }
   ]
 }

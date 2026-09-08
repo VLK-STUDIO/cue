@@ -1,9 +1,9 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { OverlayProvider } from "@vlkoss/cue";
 import * as React from "react";
 import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { appName } from "@/lib/shared";
+import { cue } from "@/components/cue";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createRootRoute({
       },
       {
         name: "description",
-        content: "Register a dialog once. Open it from anywhere.",
+        content: "Create one Cue environment. Open overlays from anywhere.",
       },
     ],
     links: [
@@ -41,9 +41,9 @@ function RootComponent() {
       </head>
       <body className="flex flex-col min-h-screen">
         <RootProvider>
-          <OverlayProvider>
+          <cue.OverlayProvider>
             <Outlet />
-          </OverlayProvider>
+          </cue.OverlayProvider>
         </RootProvider>
         <Scripts />
       </body>
