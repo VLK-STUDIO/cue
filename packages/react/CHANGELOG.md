@@ -1,5 +1,11 @@
 # @vlkoss/cue
 
+## 1.0.0
+
+### Major Changes
+
+- [#7](https://github.com/VLK-STUDIO/cue/pull/7) [`1dfd029`](https://github.com/VLK-STUDIO/cue/commit/1dfd029e63b8aaaa9195a54f00a22a1d4ae3937a) Thanks [@mauroerta](https://github.com/mauroerta)! - Make `createCue()` the only way to create overlays. This release adds isolated Cue environments, typed shared components, and provider-level backdrops while removing the global overlay API and `unmount: false`.
+
 ## Unreleased
 
 ### Changes
