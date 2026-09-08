@@ -94,6 +94,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 [cue.vlkstudio.com](https://cue.vlkstudio.com)
 
+## Credits
+
+Docs design inspired by [Emil Kowalski](https://emilkowal.ski/) ([@emilkowalski](https://x.com/emilkowalski)), especially [Sonner](https://sonner.emilkowal.ski/) and [Vaul](https://vaul.emilkowal.ski/).
+
 ## License
 
 [MIT](./packages/react/LICENSE)
