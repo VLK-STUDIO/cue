@@ -1,1 +1,7 @@
-export { OverlayManager, createOverlay, OverlayProvider, type OverlayProps } from "@vlkoss/cue";
+export {
+  OverlayManager,
+  createOverlay,
+  OverlayProvider,
+  type CloseOptions,
+  type OverlayProps,
+} from "@vlkoss/cue";

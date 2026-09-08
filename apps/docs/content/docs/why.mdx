@@ -55,7 +55,7 @@ export function useProject(id: string) {
 
 `OverlayProvider` still has to be mounted. Open on a decision in the result, not on every successful fetch.
 
-[`openAsync`](/docs/examples/open-async) is the same idea when you need to wait. It returns a Promise that resolves when the overlay closes, so an async handler can pause until the user dismisses it.
+[`openAsync`](/docs/examples/open-async) is the same idea when you need to wait. Pass a result generic on `createOverlay` and settle with `props.close({ result })`. Dismiss resolves `undefined`.
 
 ## When not to use cue
 

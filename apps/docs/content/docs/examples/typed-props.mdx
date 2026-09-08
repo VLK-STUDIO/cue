@@ -15,7 +15,7 @@ export const confirmDeleteDialog = createOverlay<{
   organizationName: string;
 }>((props) => (
   <Dialog {...props} title={`Delete ${props.organizationName}?`}>
-    <button type="button" onClick={() => confirmDeleteDialog.close()}>
+    <button type="button" onClick={() => props.close()}>
       Cancel
     </button>
   </Dialog>
@@ -35,7 +35,7 @@ export const confirmDeleteDialog = createOverlay<{
   organizationName: string;
 }>((props) => (
   <Dialog {...props} title={`Delete ${props.organizationName}?`}>
-    <button type="button" onClick={() => confirmDeleteDialog.close()}>
+    <button type="button" onClick={() => props.close()}>
       Cancel
     </button>
   </Dialog>
@@ -46,4 +46,4 @@ confirmDeleteDialog.open({
 });
 ```
 
-`OverlayProps` (`open`, `onOpenChange`) are always injected. Your generic only describes the extra fields.
+`OverlayProps` (`open`, `onOpenChange`, `close`) are always injected. Your generic only describes the extra fields.

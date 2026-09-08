@@ -1,9 +1,9 @@
 ---
 title: openAsync
-description: Wait for an overlay to close with a Promise.
+description: Wait for an overlay result with a Promise.
 ---
 
-`openAsync` opens the overlay and returns a `Promise<boolean>` that resolves `false` when it closes.
+`openAsync` opens a new instance and returns a Promise. Declare a result type as the second generic on `createOverlay`. Dismiss (Escape, backdrop, bare `close()`) resolves `undefined`.
 
 <Demo>
   <DemoPreview>
@@ -15,8 +15,9 @@ const confirmed = await asyncConfirmDialog.openAsync({
   message: "Archive this project?",
 });
 
-// false when the overlay closes
-console.log(confirmed);
+if (confirmed) {
+  // archive
+}
 ```
 
 </Demo>
@@ -24,12 +25,34 @@ console.log(confirmed);
 ## Example
 
 ```tsx
+export const asyncConfirmDialog = createOverlay<{ message: string }, boolean>((props) => (
+  <Dialog {...props} title="Confirm">
+    <button type="button" onClick={() => props.close({ result: false })}>
+      Cancel
+    </button>
+    <button type="button" onClick={() => props.close({ result: true })}>
+      Confirm
+    </button>
+  </Dialog>
+));
+
 const confirmed = await asyncConfirmDialog.openAsync({
   message: "Archive this project?",
 });
-
-// false when the overlay closes
-console.log(confirmed);
+// Promise<boolean | undefined>
 ```
 
-Use this for confirm flows in async handlers when you do not want local state.
+Any result type works:
+
+```tsx
+createOverlay<{ title: string }, "one" | "two" | "three">((props) => (
+  <button type="button" onClick={() => props.close({ result: "two" })}>
+    Two
+  </button>
+));
+
+const choice = await dialog.openAsync({ title: "Pick" });
+// Promise<"one" | "two" | "three" | undefined>
+```
+
+With no result generic, `openAsync` is `Promise<undefined>`: wait until the instance closes, no payload.

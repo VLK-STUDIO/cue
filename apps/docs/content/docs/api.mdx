@@ -5,18 +5,19 @@ description: createOverlay, OverlayProvider, and OverlayProps.
 
 ## `createOverlay(component)`
 
-Registers a component with the overlay manager and returns a handle.
+Registers a component and returns a handle. Each `open` / `openAsync` creates a new instance. Optional generics: props `P`, result `R` (`createOverlay<P, R>`).
 
 ```tsx
 const dialog = createOverlay((props) => <Dialog {...props} />);
+const confirm = createOverlay<{ message: string }, boolean>((props) => <Dialog {...props} />);
 ```
 
-| Method                        | Description                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `open(props?)`                | Show the overlay. Extra props are required when you pass a props generic.                                                                        |
-| `close({ unmount?, delay? })` | Sets `open` to `false`, then unmounts after `delay` (default `300`) so exit animations can finish. Pass `{ unmount: false }` to keep it mounted. |
-| `openAsync(props?)`           | Same as `open`, then a `Promise<boolean>` that resolves `false` when the overlay closes.                                                         |
-| `component`                   | The component you passed in. Rare. See below.                                                                                                    |
+| Method              | Description                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`      | Open a new instance. Returns that instance's `close`. Extra props are required when you pass a props generic.                                   |
+| `close(options?)`   | Close every live instance of this overlay. `{ result? }` settles pending `openAsync`s. `{ unmount?, delay? }` default unmount 300ms.            |
+| `openAsync(props?)` | Open a new instance. Returns `Promise<R \| undefined>` when you pass result generic `R`; otherwise `Promise<undefined>`. Dismiss → `undefined`. |
+| `component`         | The component you passed in. Rare. See below.                                                                                                   |
 
 ### Typed props
 
@@ -50,7 +51,12 @@ function ProjectSettings() {
       <button type="button" onClick={() => setOpen(true)}>
         Delete project
       </button>
-      <confirmDeleteDialog.component open={open} onOpenChange={setOpen} organizationName="Atlas" />
+      <confirmDeleteDialog.component
+        open={open}
+        onOpenChange={setOpen}
+        close={() => setOpen(false)}
+        organizationName="Atlas"
+      />
     </ProjectForm>
   );
 }
@@ -71,13 +77,14 @@ import { OverlayProvider } from "@vlkoss/cue";
 ## `OverlayProps`
 
 ```tsx
-type OverlayProps = {
+type OverlayProps<R = undefined> = {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  close: (options?: { result?: R; unmount?: boolean; delay?: number }) => void;
 };
 ```
 
-Spread these onto your dialog primitive so the manager stays in control.
+Spread `open` and `onOpenChange` onto your dialog primitive. Call `close` from buttons (pass `{ result }` when you declared a result generic).
 
 ## `OverlayManager`
 

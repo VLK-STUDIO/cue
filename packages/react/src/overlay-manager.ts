@@ -2,43 +2,72 @@ import type { ComponentType } from "react";
 
 export const OverlayManager = createOverlayManager();
 
-export type OverlayProps = {
-  open: boolean;
-  onOpenChange: (isOpen: boolean) => void;
+export type CloseOptions<R = undefined> = {
+  result?: R;
+  unmount?: boolean;
+  delay?: number;
 };
 
-export function createOverlay<P>(component: ComponentType<OverlayProps & P>) {
-  const id = OverlayManager.add(component as ComponentType<Partial<OverlayProps>>);
+export type OverlayProps<R = undefined> = {
+  open: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  close: (options?: CloseOptions<R>) => void;
+};
 
-  type OpenProps = P extends Record<string, unknown> ? [props: P] : [];
+const pendingResolvers = new Map<string, (result: unknown) => void>();
 
-  function open(...props: OpenProps) {
-    return OverlayManager.open(id, {
-      ...props[0],
+export function createOverlay<P extends object = {}, R = undefined>(
+  component: ComponentType<OverlayProps<R> & P>,
+) {
+  type OpenProps = keyof P extends never ? [] : [props: P];
+
+  function settle(instanceId: string, result: R | undefined) {
+    pendingResolvers.get(instanceId)?.(result);
+    pendingResolvers.delete(instanceId);
+  }
+
+  function closeInstance(instanceId: string, { result, ...rest }: CloseOptions<R> = {}) {
+    settle(instanceId, result);
+    return OverlayManager.close(instanceId, { unmount: true, ...rest });
+  }
+
+  function mountInstance(...props: OpenProps) {
+    const instanceId = OverlayManager.add(component as ComponentType<Partial<OverlayProps>>);
+
+    const close = (options?: CloseOptions<R>) => closeInstance(instanceId, options);
+
+    OverlayManager.open(instanceId, {
+      ...(props[0] as object | undefined),
+      close,
       onOpenChange(isOpen: boolean) {
         if (!isOpen) {
-          OverlayManager.close(id);
+          close();
         }
       },
     });
+
+    return { instanceId, close };
+  }
+
+  function open(...props: OpenProps) {
+    return mountInstance(...props).close;
   }
 
   function openAsync(...props: OpenProps) {
-    return new Promise<boolean>((resolve) => {
-      OverlayManager.open(id, {
-        ...props[0],
-        onOpenChange(isOpen: boolean) {
-          if (!isOpen) {
-            OverlayManager.close(id);
-            resolve(false);
-          }
-        },
-      });
+    return new Promise<R | undefined>((resolve) => {
+      const { instanceId } = mountInstance(...props);
+      pendingResolvers.set(instanceId, resolve as (result: unknown) => void);
     });
   }
 
-  function close(options?: { unmount: boolean; delay?: number }) {
-    return OverlayManager.close(id, options);
+  function close(options: CloseOptions<R> = {}) {
+    const instances = OverlayManager.all().filter(
+      (overlay) => overlay.component === component && (overlay.open || overlay.visible),
+    );
+
+    for (const instance of instances) {
+      closeInstance(instance.id, options);
+    }
   }
 
   return {
@@ -86,6 +115,8 @@ function createOverlayManager() {
       component,
     });
 
+    notify();
+
     return overlayId;
   }
 
@@ -118,6 +149,11 @@ function createOverlayManager() {
     notify();
   }
 
+  function remove(overlayId: string) {
+    overlays = overlays.filter((overlay) => overlay.id !== overlayId);
+    notify();
+  }
+
   function open<P extends Record<string, unknown>>(overlayId: string, props: P) {
     set(overlayId, {
       open: true,
@@ -137,10 +173,7 @@ function createOverlayManager() {
 
     if (options.unmount) {
       setTimeout(() => {
-        set(overlayId, {
-          open: false,
-          visible: false,
-        });
+        remove(overlayId);
       }, options?.delay ?? 300);
     }
   }

@@ -7,7 +7,7 @@ export const welcomeDialog = createOverlay((props) => (
       Opened with <code>welcomeDialog.open()</code>. No local state.
     </p>
     <div className="om-dialog-actions">
-      <button type="button" className="om-button" onClick={() => welcomeDialog.close()}>
+      <button type="button" className="om-button" onClick={() => props.close()}>
         Close
       </button>
     </div>
@@ -20,7 +20,7 @@ export const settingsDialog = createOverlay((props) => (
       No extra props. Opened with <code>settingsDialog.open()</code>.
     </p>
     <div className="om-dialog-actions">
-      <button type="button" className="om-button" onClick={() => settingsDialog.close()}>
+      <button type="button" className="om-button" onClick={() => props.close()}>
         Close
       </button>
       <button
@@ -46,33 +46,27 @@ export const confirmDeleteDialog = createOverlay<{
       Typed props, stacked on top of Settings, closed from the overlay itself.
     </p>
     <div className="om-dialog-actions">
-      <button type="button" className="om-button" onClick={() => confirmDeleteDialog.close()}>
+      <button type="button" className="om-button" onClick={() => props.close()}>
         Cancel
       </button>
-      <button
-        type="button"
-        className="om-button om-button-danger"
-        onClick={() => confirmDeleteDialog.close()}
-      >
+      <button type="button" className="om-button om-button-danger" onClick={() => props.close()}>
         Delete
       </button>
     </div>
   </Dialog>
 ));
 
-export const asyncConfirmDialog = createOverlay<{
-  message: string;
-}>((props) => (
+export const asyncConfirmDialog = createOverlay<{ message: string }, boolean>((props) => (
   <Dialog {...props} title="Confirm">
     <p className="om-dialog-body">{props.message}</p>
     <div className="om-dialog-actions">
-      <button type="button" className="om-button" onClick={() => asyncConfirmDialog.close()}>
+      <button type="button" className="om-button" onClick={() => props.close({ result: false })}>
         Cancel
       </button>
       <button
         type="button"
         className="om-button om-button-primary"
-        onClick={() => asyncConfirmDialog.close()}
+        onClick={() => props.close({ result: true })}
       >
         Confirm
       </button>
