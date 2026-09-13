@@ -3,7 +3,6 @@ import type { OverlayDefinition } from "./types.js";
 export type OverlayInstance = {
   id: string;
   open: boolean;
-  visible: boolean;
   props: object;
   definition: OverlayDefinition;
   close: () => void;
@@ -11,10 +10,11 @@ export type OverlayInstance = {
 
 export type OverlayStore = ReturnType<typeof createOverlayStore>;
 
-export function createOverlayStore() {
+export function createOverlayStore({ delay: defaultDelay = 300 }: { delay?: number } = {}) {
   let overlays: OverlayInstance[] = [];
   let nextId = 0;
   const listeners = new Set<() => void>();
+  const timeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
   function notify() {
     for (const listener of listeners) {
@@ -38,7 +38,6 @@ export function createOverlayStore() {
       {
         id,
         open: true,
-        visible: true,
         props,
         definition,
         close,
@@ -50,6 +49,13 @@ export function createOverlayStore() {
   }
 
   function remove(id: string) {
+    const timeout = timeouts.get(id);
+
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+      timeouts.delete(id);
+    }
+
     if (!overlays.some((overlay) => overlay.id === id)) {
       return;
     }
@@ -58,7 +64,7 @@ export function createOverlayStore() {
     notify();
   }
 
-  function close(id: string, { delay = 300 }: { delay?: number } = {}) {
+  function close(id: string, { delay = defaultDelay }: { delay?: number } = {}) {
     const overlay = overlays.find((item) => item.id === id);
 
     if (!overlay || !overlay.open) {
@@ -70,13 +76,23 @@ export function createOverlayStore() {
         ? {
             ...item,
             open: false,
-            visible: true,
           }
         : item,
     );
     notify();
 
-    setTimeout(() => remove(id), delay);
+    const timeout = setTimeout(() => remove(id), delay);
+    timeouts.set(id, timeout);
+  }
+
+  function reset() {
+    for (const timeout of timeouts.values()) {
+      clearTimeout(timeout);
+    }
+
+    timeouts.clear();
+    overlays = [];
+    notify();
   }
 
   function all() {
@@ -87,6 +103,7 @@ export function createOverlayStore() {
     add,
     all,
     close,
+    reset,
     subscribe,
   };
 }

@@ -3,35 +3,42 @@ title: Customization
 description: Configure a custom backdrop and reusable components for a Cue environment.
 ---
 
-`createCue()` needs no options. Add a backdrop or shared components when your overlays need them.
+`createCue()` needs no options. Add a backdrop, a close delay, or shared components when your overlays need them.
 
 ## Custom backdrops
 
-Pass a component through `backdrop`:
+Pass a component through `backdrop`. It is not a dialog. Cue portals it with the overlay instances.
 
 ```tsx
-function OverlayBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="fixed inset-0 bg-black/50"
-      onClick={() => close({ strategy: "last" })}
-    />
-  );
-}
+import { createCue, type CueBackdrop } from "@vlkoss/cue";
+
+const OverlayBackdrop: CueBackdrop = ({ open, close }) => (
+  <div
+    aria-hidden="true"
+    data-open={open ? "" : undefined}
+    className="fixed inset-0 bg-black/50"
+    style={{ pointerEvents: open ? "auto" : "none" }}
+    onClick={() => close({ strategy: "last" })}
+  />
+);
 
 export const cue = createCue({
   backdrop: OverlayBackdrop,
+  delay: 300,
 });
 ```
 
-The backdrop belongs to the provider, not to an individual overlay. The provider renders no backdrop when the stack is empty, one backdrop for one or many visible overlays, and removes it immediately when the final instance starts closing. An overlay can remain mounted during its exit delay without keeping the backdrop visible.
+`open` is `true` while the stack should show a dim, then `false` during the last overlay instance's close delay so the dim can fade out. Use `{ strategy: "last" }` to close the top open overlay instance or `{ strategy: "all" }` to close every open overlay instance.
+
+An overlay definition can replace that dim, or opt out so a lower overlay instance keeps it:
+
+```tsx
+const popover = cue.createOverlay(() => <Popover />, { backdrop: false });
+```
+
+Opened alone, that overlay instance has no dim. Opened over a dialog that uses the environment backdrop, the dialog's dim stays.
 
 This matters when overlays stack. Rendering a backdrop inside each dialog creates one element per dialog and makes the stack darker as it grows. A provider-level backdrop keeps the stack predictable.
-
-Cue passes a `close` callback to the backdrop. The backdrop chooses whether to close the top open overlay with `{ strategy: "last" }` or every open overlay with `{ strategy: "all" }`.
-
-If a UI library's native backdrop reads a root context, wrap that backdrop in the library's root and portal. The [shadcn integration](/docs/shadcn) uses this pattern for both its Radix and Base UI Dialog wrappers.
 
 ## Reusable components
 

@@ -1,6 +1,6 @@
 ---
 title: Using Cue with shadcn
-description: Install Cue with shadcn and configure its native Dialog backdrop.
+description: Install Cue with shadcn and let Cue own the shared backdrop.
 ---
 
 The shadcn registry can install the Dialog component and create a local Cue module for your app:
@@ -30,7 +30,7 @@ npx shadcn@latest add VLK-STUDIO/cue/cue
   </Tab>
 </Tabs>
 
-The registry installs shadcn's `dialog` item first, then creates `components/cue/index.tsx`. That file owns the Cue instance, the native backdrop adapter, and the shared Dialog component map. You can edit it like any other application file.
+The registry installs shadcn's `dialog` item first, then creates `components/cue/index.tsx`. That file owns the Cue instance, the shared backdrop, and the Dialog component map. You can edit it like any other application file.
 
 ## Allow Cue to own the backdrop
 
@@ -56,14 +56,14 @@ Keep the rest of shadcn's generated component unchanged. With the Radix-based Di
 
 ## The generated Cue module
 
-The generated file adapts the local shadcn components to Cue. `wrapper` is the Dialog root. `content` disables the local backdrop. The remaining keys are ordinary shared components that you can use or replace.
+The generated file adapts the local shadcn components to Cue. `wrapper` is the Dialog root. `content` disables the local backdrop. The shared backdrop is a dim Cue portals with the overlay instances, not a second Dialog root. The remaining keys are ordinary shared components that you can use or replace.
 
 ```tsx
 // components/cue/index.tsx
 "use client";
 
 import type { ComponentProps } from "react";
-import { createCue } from "@vlkoss/cue";
+import { createCue, type CueBackdrop } from "@vlkoss/cue";
 import {
   Dialog,
   DialogClose,
@@ -71,8 +71,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogOverlay,
-  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -83,15 +81,15 @@ function CueContent(props: CueContentProps) {
   return <DialogContent {...props} showBackdrop={false} />;
 }
 
-function CueBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
-  return (
-    <Dialog open>
-      <DialogPortal>
-        <DialogOverlay onClick={() => close({ strategy: "last" })} />
-      </DialogPortal>
-    </Dialog>
-  );
-}
+const CueBackdrop: CueBackdrop = ({ open, close }) => (
+  <div
+    aria-hidden="true"
+    data-open={open ? "" : undefined}
+    className="fixed inset-0 isolate z-50 bg-black/10 opacity-0 transition-opacity duration-100 supports-backdrop-filter:backdrop-blur-xs starting:opacity-0 data-open:opacity-100"
+    style={{ pointerEvents: open ? "auto" : "none" }}
+    onClick={() => close({ strategy: "last" })}
+  />
+);
 
 export const cue = createCue({
   backdrop: CueBackdrop,
@@ -108,7 +106,7 @@ export const cue = createCue({
 });
 ```
 
-The backdrop creates a separate shadcn Dialog root and portal. That gives the native `DialogOverlay` the context it needs while Cue decides when the backdrop mounts. Cue passes the backdrop a `close` callback, and this adapter chooses to close the top open overlay. The overlay itself does not render a backdrop.
+Do not copy `DialogOverlay`'s `animate-in` / `animate-out` classes onto this div. Cue keeps the backdrop mounted until close delay ends, and those keyframes use fill-mode `none`, so the dim fades out then pops back in until unmount. An opacity transition stays faded. Cue passes `open` for that delay, and this adapter closes the top open overlay instance on click.
 
 ## Use the configured components
 

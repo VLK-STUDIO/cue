@@ -59,17 +59,17 @@ const cue = createCue({
 });
 ```
 
-Cue exposes the configured components through `ctx.components` and leaves composition to each overlay. It renders the configured backdrop once for the visible stack. A UI library backdrop adapter must provide any root or portal context the library requires.
+Cue exposes the configured components through `ctx.components` and leaves composition to each overlay. The OverlayProvider portals the shared backdrop and overlay instances to `document.body`, or to `container`. The backdrop receives `open` and `close`. Choose `{ strategy: "last" }` or `{ strategy: "all" }`.
 
-The backdrop receives a `close` callback. Choose `{ strategy: "last" }` to close the top open overlay or `{ strategy: "all" }` to close every open overlay.
+An overlay definition may pass `{ backdrop: false }` to opt out of the dim, or pass a replacement. `createCue({ delay })` sets the close delay. Default `300`. `open()` returns a `close` that accepts `{ result, delay }` like `ctx.close`.
 
-Closing instances remain visible during their `delay`, but the backdrop disappears as soon as the final open instance starts closing. Instances always unmount after that delay. There is no `unmount: false` option.
+Unmounting the provider dismisses pending `openAsync()` calls as `undefined` and clears the stack. There is no `unmount: false` option.
 
 Each call to `createCue()` creates an isolated store, provider, definitions, and lifecycle state. The package does not export global `createOverlay`, `OverlayProvider`, or `OverlayManager` values.
 
 ## Types
 
-`OverlayContext<C, R>` contains `open`, `onOpenChange`, `close`, and the exact component map inferred from `createCue({ components })`. `CloseOptions<R>` accepts `result` and `delay`.
+`OverlayContext<C, R>` contains `open`, `onOpenChange`, `close`, and the exact component map inferred from `createCue({ components })`. `CloseOptions<R>` accepts `result` and `delay`. The package also exports `OverlayHandle`, `CueOptions`, `CueBackdrop`, `CueBackdropCloseOptions`, `OverlayDefinitionOptions`, and `OverlayProviderProps`.
 
 ## License
 

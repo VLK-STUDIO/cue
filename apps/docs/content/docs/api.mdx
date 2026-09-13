@@ -10,6 +10,7 @@ description: createCue, createOverlay, context, and the provider.
 ```tsx
 const cue = createCue({
   backdrop: OverlayBackdrop,
+  delay: 300,
   components: {
     wrapper: OverlayWrapper,
     content: OverlayContent,
@@ -20,9 +21,11 @@ const cue = createCue({
 
 `components` is an application-defined map. Cue does not reserve keys such as `header` or `footer`. The exact map is inferred in every overlay callback.
 
-`backdrop` is different. Cue renders it once for the visible stack. Individual overlays do not render it.
+`backdrop` is the environment's shared backdrop. Cue renders it once for the stack. Individual overlays do not render it.
 
-The backdrop receives a `close` callback. Call it with `{ strategy: "last" }` to close the top open overlay or `{ strategy: "all" }` to close every open overlay.
+`delay` is the environment close delay in milliseconds. Default `300`. `close({ delay })` overrides it for one overlay instance.
+
+The backdrop receives `open` and `close`. `open` stays `true` while any overlay instance that did not opt out is open, then `false` during the last instance's close delay. Call `close` with `{ strategy: "last" }` to close the top open overlay instance or `{ strategy: "all" }` to close every open overlay instance.
 
 For the shadcn Dialog adapter, see [Using Cue with shadcn](/docs/shadcn). For custom backdrops and shared components, see [Customization](/docs/customization).
 
@@ -32,9 +35,13 @@ For the shadcn Dialog adapter, see [Using Cue with shadcn](/docs/shadcn). For cu
 <cue.OverlayProvider>{children}</cue.OverlayProvider>
 ```
 
-The provider renders children, every visible overlay, and one shared backdrop while at least one instance is open. An instance remains visible while its close delay runs, but the backdrop disappears as soon as the final instance starts closing.
+Mount it once, near the root. The provider portals the shared backdrop and every overlay instance to `document.body`. Pass `container` to portal somewhere else.
 
-## `cue.createOverlay<Props, Result>(render)`
+A second `OverlayProvider` for the same Cue environment renders children only and warns in development. Unmounting the outlet provider dismisses pending `openAsync()` calls as `undefined` and clears the stack.
+
+An overlay instance remains mounted while its close delay runs. The shared backdrop stays mounted for that window when the instance is the last.
+
+## `cue.createOverlay<Props, Result>(render, options?)`
 
 ```tsx
 const dialog = cue.createOverlay<{ message: string }, boolean>((props, ctx) => {
@@ -61,15 +68,23 @@ type OverlayContext<Components, Result> = {
 
 `props` contains only the object passed to `open()` or `openAsync()`. Do not expect `open`, `close`, or `components` there.
 
+Pass `{ backdrop }` as the second argument to replace the environment dim, or `{ backdrop: false }` to opt out of providing one so a lower overlay instance can keep it:
+
+```tsx
+const popover = cue.createOverlay(() => <Popover />, { backdrop: false });
+```
+
+`open()` and `openAsync()` still take application props only.
+
 ### Handle methods
 
-| Method               | Description                                                                                                                   |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `open(props?)`       | Opens one instance and returns that instance's `close` function. Props are required when `Props` has a required key.          |
-| `openAsync(props?)`  | Opens one instance and returns `Promise<Result \| undefined>`. Dismissal resolves `undefined`.                                |
-| `closeAll(options?)` | Closes every live instance from this overlay definition. A `result` settles every pending `openAsync()` from that definition. |
+| Method               | Description                                                                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open(props?)`       | Opens one instance and returns that instance's `close` function. The function accepts the same `{ result, delay }` as `ctx.close`. Props are required when `Props` has a required key. |
+| `openAsync(props?)`  | Opens one instance and returns `Promise<Result \| undefined>`. Dismissal resolves `undefined`.                                                                                         |
+| `closeAll(options?)` | Closes every live instance from this overlay definition. A `result` settles every pending `openAsync()` from that definition.                                                          |
 
-Closed instances always unmount after `delay`, which defaults to `300` milliseconds. There is no `unmount: false` option.
+Closed instances always unmount after `delay`. There is no `unmount: false` option.
 
 ### Optional props
 
@@ -94,4 +109,6 @@ confirm.open({ message: "Continue?" });
 
 ## Shared backdrop behavior
 
-The provider renders no backdrop with no open overlays, one backdrop with one overlay, and still one backdrop for a stack. Closing the top overlay leaves the backdrop while the lower overlay remains. Closing the final instance removes it immediately, while the instance itself remains mounted until its delay expires. `closeAll()` follows the same rule.
+Cue renders no dim when every open overlay instance opted out, one dim for one overlay instance, and still one dim for a stack. Closing the top overlay instance leaves the dim while a lower instance remains. Closing the last instance sets `open={false}` on the dim and removes it when that instance's close delay ends. `closeAll()` follows the same rule.
+
+The dim comes from the top open overlay instance that did not opt out: that overlay definition's replacement, otherwise the environment's.
