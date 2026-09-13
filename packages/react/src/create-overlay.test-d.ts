@@ -1,6 +1,14 @@
 import { createElement, type ComponentProps, type ReactNode } from "react";
 import { expectTypeOf, test } from "vitest";
-import { createCue, type CloseOptions } from "./index.js";
+import {
+  createCue,
+  type CloseOptions,
+  type CueBackdropCloseOptions,
+  type CueOptions,
+  type OverlayDefinitionOptions,
+  type OverlayHandle,
+  type OverlayProviderProps,
+} from "./index.js";
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return createElement("div", null, children);
@@ -25,14 +33,40 @@ test("createCue infers the exact application component map", () => {
   });
 });
 
-test("backdrop receives a strategy-based close callback", () => {
+test("backdrop receives open and a strategy-based close callback", () => {
   createCue({
-    backdrop: ({ close }) => {
-      expectTypeOf(close).toEqualTypeOf<(options: { strategy: "last" | "all" }) => void>();
+    backdrop: ({ open, close }) => {
+      expectTypeOf(open).toBeBoolean();
+      expectTypeOf(close).toEqualTypeOf<(options: CueBackdropCloseOptions) => void>();
 
       return null;
     },
   });
+});
+
+test("createCue accepts delay next to backdrop and components", () => {
+  expectTypeOf<CueOptions>().toMatchTypeOf<{
+    delay?: number;
+    backdrop?: CueOptions["backdrop"];
+    components?: CueOptions["components"];
+  }>();
+});
+
+test("createOverlay accepts a definition-level backdrop override", () => {
+  const cue = createCue();
+
+  cue.createOverlay(() => null, { backdrop: false });
+  cue.createOverlay(() => null, {
+    backdrop: ({ open, close }) => {
+      expectTypeOf(open).toBeBoolean();
+      void close;
+      return null;
+    },
+  });
+
+  expectTypeOf<OverlayDefinitionOptions>().toMatchTypeOf<{
+    backdrop?: false | CueOptions["backdrop"];
+  }>();
 });
 
 test("context keeps runtime values out of application props", () => {
@@ -79,7 +113,7 @@ test("required props remain required for open and openAsync", () => {
   dialog.open({});
 });
 
-test("result types flow through openAsync and context close", () => {
+test("result types flow through openAsync, context close, and open's close", () => {
   const cue = createCue();
   const dialog = cue.createOverlay<{}, boolean>((_props, context) => {
     expectTypeOf(context.close).toEqualTypeOf<(options?: CloseOptions<boolean>) => void>();
@@ -91,15 +125,19 @@ test("result types flow through openAsync and context close", () => {
     return null;
   });
 
+  expectTypeOf(dialog.open()).toEqualTypeOf<(options?: CloseOptions<boolean>) => void>();
   expectTypeOf(dialog.openAsync()).resolves.toEqualTypeOf<boolean | undefined>();
+  expectTypeOf<OverlayHandle<{}, boolean>["open"]>().toMatchTypeOf<typeof dialog.open>();
 });
 
-test("provider exposes only its children prop", () => {
+test("provider exposes children and an optional portal container", () => {
   const cue = createCue({ components: { footer: Footer } });
   const Provider = cue.OverlayProvider;
 
-  expectTypeOf<ComponentProps<typeof Provider>>().toEqualTypeOf<{
+  expectTypeOf<ComponentProps<typeof Provider>>().toEqualTypeOf<OverlayProviderProps>();
+  expectTypeOf<OverlayProviderProps>().toMatchTypeOf<{
     children?: ReactNode;
+    container?: Element | DocumentFragment;
   }>();
 });
 

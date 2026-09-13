@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { createCue } from "@vlkoss/cue";
+import { createCue, type CueBackdrop } from "@vlkoss/cue";
 import {
   Dialog,
   DialogClose,
@@ -9,8 +9,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogOverlay,
-  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -21,15 +19,15 @@ function CueContent(props: CueContentProps) {
   return <DialogContent {...props} showBackdrop={false} />;
 }
 
-function CueBackdrop({ close }: { close: (options: { strategy: "last" | "all" }) => void }) {
-  return (
-    <Dialog open>
-      <DialogPortal>
-        <DialogOverlay onClick={() => close({ strategy: "last" })} />
-      </DialogPortal>
-    </Dialog>
-  );
-}
+const CueBackdrop: CueBackdrop = ({ open, close }) => (
+  <div
+    aria-hidden="true"
+    data-open={open ? "" : undefined}
+    className="fixed inset-0 isolate z-50 bg-black/10 opacity-0 transition-opacity duration-100 supports-backdrop-filter:backdrop-blur-xs starting:opacity-0 data-open:opacity-100"
+    style={{ pointerEvents: open ? "auto" : "none" }}
+    onClick={() => close({ strategy: "last" })}
+  />
+);
 
 export const cue = createCue({
   backdrop: CueBackdrop,

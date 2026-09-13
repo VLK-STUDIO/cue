@@ -65,11 +65,11 @@ confirmDialog.closeAll();
 
 ## Using shadcn
 
-If your app uses shadcn, the [Using Cue with shadcn guide](https://cue.vlkstudio.com/docs/shadcn) explains the registry setup and the native Dialog backdrop adapter.
+If your app uses shadcn, the [Using Cue with shadcn guide](https://cue.vlkstudio.com/docs/shadcn) explains the registry setup and the shared backdrop adapter.
 
 ## Customization
 
-Cue has no backdrop or shared components by default. Add them with `createCue({ backdrop, components })` when your application needs them. See the [Customization guide](https://cue.vlkstudio.com/docs/customization).
+Cue has no backdrop or shared components by default. Add them with `createCue({ backdrop, delay, components })` when your application needs them. See the [Customization guide](https://cue.vlkstudio.com/docs/customization).
 
 ## Next.js
 

@@ -1,83 +1,84 @@
+"use client";
+
 import { createOverlayProvider } from "./overlay-provider.js";
 import { createOverlayStore } from "./overlay-manager.js";
 import type {
   CloseOptions,
-  CueBackdrop,
   CueComponents,
-  OverlayRenderer,
+  CueOptions,
   OverlayDefinition,
+  OverlayDefinitionOptions,
+  OverlayHandle,
+  OverlayRenderer,
 } from "./types.js";
-
-type OpenArguments<P extends object> = {} extends P ? [props?: P] : [props: P];
-
-type OverlayHandle<P extends object, R> = {
-  /** Open one instance and return a close function bound to that instance. */
-  open: (...args: OpenArguments<P>) => () => void;
-  /** Open one instance and resolve when that instance closes. */
-  openAsync: (...args: OpenArguments<P>) => Promise<R | undefined>;
-  /** Close every live instance created from this overlay definition. */
-  closeAll: (options?: CloseOptions<R>) => void;
-};
-
-type CueOptions<C extends CueComponents> = {
-  backdrop?: CueBackdrop;
-  components?: C;
-};
 
 /** Create an isolated overlay environment with its own provider and lifecycle state. */
 export function createCue<const C extends CueComponents = {}>(options: CueOptions<C> = {}) {
-  const store = createOverlayStore();
+  const store = createOverlayStore({ delay: options.delay });
   const components = (options.components ?? {}) as C;
-  const OverlayProvider = createOverlayProvider({ store, components, backdrop: options.backdrop });
+  const pendingResolvers = new Map<string, (result: unknown) => void>();
+
+  function settle(instanceId: string, result: unknown) {
+    pendingResolvers.get(instanceId)?.(result);
+    pendingResolvers.delete(instanceId);
+  }
+
+  function teardown() {
+    for (const resolve of pendingResolvers.values()) {
+      resolve(undefined);
+    }
+
+    pendingResolvers.clear();
+    store.reset();
+  }
+
+  const OverlayProvider = createOverlayProvider({
+    store,
+    components,
+    backdrop: options.backdrop,
+    teardown,
+  });
 
   /** Create an overlay definition owned by this Cue environment. */
   function createOverlay<P extends object = {}, R = undefined>(
     render: OverlayRenderer<P, C, R>,
+    definitionOptions: OverlayDefinitionOptions = {},
   ): OverlayHandle<P, R> {
     const definition: OverlayDefinition = {
       render: render as OverlayDefinition["render"],
+      backdrop: definitionOptions.backdrop,
     };
-    const pendingResolvers = new Map<string, (result: R | undefined) => void>();
 
-    function settle(instanceId: string, result: R | undefined) {
-      pendingResolvers.get(instanceId)?.(result);
-      pendingResolvers.delete(instanceId);
-    }
-
-    function closeInstance(instanceId: string, options: CloseOptions<R> = {}) {
-      settle(instanceId, options.result);
-      store.close(instanceId, { delay: options.delay });
+    function closeInstance(instanceId: string, closeOptions: CloseOptions<R> = {}) {
+      settle(instanceId, closeOptions.result);
+      store.close(instanceId, { delay: closeOptions.delay });
     }
 
     function mountInstance(props: P | undefined) {
       let instanceId = "";
-      const close = (options?: CloseOptions<R>) => closeInstance(instanceId, options);
+      const close = (closeOptions?: CloseOptions<R>) => closeInstance(instanceId, closeOptions);
 
       instanceId = store.add(definition, props ?? {}, close);
 
       return { instanceId, close };
     }
 
-    function open(...args: OpenArguments<P>) {
+    function open(...args: Parameters<OverlayHandle<P, R>["open"]>) {
       return mountInstance(args[0]).close;
     }
 
-    function openAsync(...args: OpenArguments<P>) {
+    function openAsync(...args: Parameters<OverlayHandle<P, R>["openAsync"]>) {
       return new Promise<R | undefined>((resolve) => {
         const { instanceId } = mountInstance(args[0]);
-        pendingResolvers.set(instanceId, resolve);
+        pendingResolvers.set(instanceId, resolve as (result: unknown) => void);
       });
     }
 
-    function closeAll(options: CloseOptions<R> = {}) {
-      const instances = store
-        .all()
-        .filter(
-          (overlay) => overlay.definition === definition && (overlay.open || overlay.visible),
-        );
+    function closeAll(closeOptions: CloseOptions<R> = {}) {
+      const instances = store.all().filter((overlay) => overlay.definition === definition);
 
       for (const instance of instances) {
-        closeInstance(instance.id, options);
+        closeInstance(instance.id, closeOptions);
       }
     }
 
