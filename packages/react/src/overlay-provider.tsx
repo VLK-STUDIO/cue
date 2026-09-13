@@ -2,6 +2,7 @@
 
 import {
   createElement,
+  memo,
   useId,
   useLayoutEffect,
   useSyncExternalStore,
@@ -42,26 +43,38 @@ export function createOverlayProvider<C extends CueComponents>(params: {
     }
   }
 
+  function claim(id: string) {
+    if (owner === null) {
+      owner = id;
+      notifyOutlet();
+    }
+
+    return owner;
+  }
+
+  function release(id: string) {
+    if (owner !== id) {
+      return;
+    }
+
+    owner = null;
+    params.teardown();
+    notifyOutlet();
+  }
+
   function OverlayProvider({ children, container }: OverlayProviderProps) {
     const id = useId();
     const outletOwner = useSyncExternalStore(subscribeOutlet, getOwner, getOwner);
 
     useLayoutEffect(() => {
-      if (owner === null) {
-        owner = id;
-        notifyOutlet();
-      } else if (owner !== id && isDev()) {
+      if (claim(id) !== id && isDev()) {
         console.warn(
           "Cue: OverlayProvider is already mounted for this Cue environment. This copy will not render overlays.",
         );
       }
 
       return () => {
-        if (owner === id) {
-          owner = null;
-          params.teardown();
-          notifyOutlet();
-        }
+        release(id);
       };
     }, [id]);
 
@@ -100,13 +113,13 @@ function CuePortal({
   return createPortal(children, target);
 }
 
-function OverlayOutlet<C extends CueComponents>({
+const OverlayOutlet = memo(function OverlayOutlet({
   store,
   components,
   backdrop,
 }: {
   store: OverlayStore;
-  components: C;
+  components: CueComponents;
   backdrop?: CueBackdrop;
 }) {
   const overlays = useSyncExternalStore(store.subscribe, store.all, store.all);
@@ -126,7 +139,7 @@ function OverlayOutlet<C extends CueComponents>({
       ))}
     </>
   );
-}
+});
 
 function OverlayView<C extends CueComponents>({
   overlay,

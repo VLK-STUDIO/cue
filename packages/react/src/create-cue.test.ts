@@ -468,6 +468,34 @@ describe("OverlayProvider mount", () => {
     expect(document.querySelector("[data-overlay]")).toBeNull();
   });
 
+  it("does not rerender overlay instances when OverlayProvider children rerender", () => {
+    const cue = createCue();
+    let renders = 0;
+    const dialog = cue.createOverlay(() => {
+      renders += 1;
+      return createElement("div", { "data-overlay": true });
+    });
+
+    function App({ label }: { label: string }) {
+      return createElement(
+        cue.OverlayProvider,
+        null,
+        createElement("span", { "data-label": label }),
+      );
+    }
+
+    const view = render(createElement(App, { label: "first" }));
+    mutate(() => {
+      dialog.open();
+    });
+    const rendersAfterOpen = renders;
+
+    view.rerender(createElement(App, { label: "second" }));
+
+    expect(renders).toBe(rendersAfterOpen);
+    expect(document.querySelector("[data-label]")?.getAttribute("data-label")).toBe("second");
+  });
+
   it("does not render overlays from a second provider", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const cue = createCue();
