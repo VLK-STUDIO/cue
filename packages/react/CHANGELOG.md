@@ -1,5 +1,11 @@
 # @vlkoss/cue
 
+## 1.1.0
+
+### Minor Changes
+
+- [#9](https://github.com/VLK-STUDIO/cue/pull/9) [`4ef1fb8`](https://github.com/VLK-STUDIO/cue/commit/4ef1fb88949a726f0ecfe4ff359619ded54776e9) Thanks [@mauroerta](https://github.com/mauroerta)! - Portal the overlay outlet, follow close delay on the shared backdrop, and let overlay definitions opt out of or replace that dim.
+
 ## 1.0.0
 
 ### Major Changes
