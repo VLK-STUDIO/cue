@@ -38,8 +38,6 @@ export function createOverlayStack(
 }
 
 function resolveBackdrop(instances: OverlayInstance[], environmentBackdrop?: CueBackdrop) {
-  let inherit = false;
-
   for (let index = instances.length - 1; index >= 0; index -= 1) {
     const override = instances[index]?.definition.backdrop;
 
@@ -47,12 +45,8 @@ function resolveBackdrop(instances: OverlayInstance[], environmentBackdrop?: Cue
       continue;
     }
 
-    if (override !== undefined) {
-      return override;
-    }
-
-    inherit = true;
+    return override ?? environmentBackdrop;
   }
 
-  return inherit ? environmentBackdrop : undefined;
+  return undefined;
 }

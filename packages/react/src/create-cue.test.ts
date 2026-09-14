@@ -448,6 +448,27 @@ describe("shared backdrop", () => {
     expect(document.querySelector("[data-cue-backdrop]")).toBeNull();
     expect(document.querySelector("[data-replacement-backdrop]")).not.toBeNull();
   });
+
+  it("keeps the environment backdrop when the top overlay inherits over a lower replacement", () => {
+    function CustomBackdrop({ open }: { open: boolean }) {
+      return createElement("div", { "data-custom-backdrop": true, "data-open": String(open) });
+    }
+
+    const cue = createCue({ backdrop: Backdrop });
+    const lower = cue.createOverlay(() => createElement("div", { "data-overlay": "lower" }), {
+      backdrop: CustomBackdrop,
+    });
+    const upper = cue.createOverlay(() => createElement("div", { "data-overlay": "upper" }));
+
+    mount(cue);
+    mutate(() => {
+      lower.open();
+      upper.open();
+    });
+
+    expect(document.querySelector("[data-cue-backdrop]")).not.toBeNull();
+    expect(document.querySelector("[data-custom-backdrop]")).toBeNull();
+  });
 });
 
 describe("OverlayProvider mount", () => {
