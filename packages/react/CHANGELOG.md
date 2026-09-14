@@ -1,5 +1,11 @@
 # @vlkoss/cue
 
+## 1.1.1
+
+### Patch Changes
+
+- [#11](https://github.com/VLK-STUDIO/cue/pull/11) [`2393328`](https://github.com/VLK-STUDIO/cue/commit/23933283f5ae1a434363fc13e98e5467b671db72) Thanks [@mauroerta](https://github.com/mauroerta)! - Stop inherited backdrops from using a lower overlay's replacement. The top participating overlay now resolves to the environment backdrop when it does not set one.
+
 ## 1.1.0
 
 ### Minor Changes
