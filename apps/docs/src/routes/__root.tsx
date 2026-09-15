@@ -20,7 +20,7 @@ export const Route = createRootRoute({
       },
       {
         name: "description",
-        content: "Create one Cue environment. Open overlays from anywhere.",
+        content: "The simplest way to manage programmatic overlays in React.",
       },
     ],
     links: [

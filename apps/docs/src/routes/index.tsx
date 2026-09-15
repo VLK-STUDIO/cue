@@ -16,7 +16,7 @@ function Home() {
         <LogoMark className="om-logo om-logo-hero" />
         <h1 className="om-landing-title">{appName}</h1>
         <p className="om-landing-tagline">
-          Create one Cue environment. Open overlays from anywhere.
+          The simplest way to manage programmatic overlays in React.
         </p>
         <div className="om-landing-actions">
           <button
