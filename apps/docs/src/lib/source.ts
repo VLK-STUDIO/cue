@@ -1,4 +1,4 @@
-import { loader } from "fumadocs-core/source";
+import { loader, llms } from "fumadocs-core/source";
 import { defineDocs } from "fumadocs-mdx/macro";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 import { docsRoute } from "./shared";
@@ -26,3 +26,11 @@ export async function getLLMText(page: (typeof source)["$inferPage"]) {
 
 ${processed}`;
 }
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    return `# ${page.data.title} (${page.url})
+
+  ${await page.data.getText("processed")}`;
+  },
+});

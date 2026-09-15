@@ -1,3 +1,5 @@
+import { createGetUrl } from "fumadocs-core/source";
+
 export const appName = "cue";
 export const docsRoute = "/docs";
 export const docsImageRoute = "/og/docs";
@@ -29,4 +31,17 @@ export function decodeMarkdownUrl(segments: string[]) {
   out[out.length - 1] = out[out.length - 1].replace(/\.md$/, "");
   if (out.length === 1 && out[0] === "index") out.pop();
   return out;
+}
+
+const getDocsUrl = createGetUrl(docsRoute);
+
+export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs];
+  if (segments.length === 0) {
+    segments.push("index.md");
+  } else {
+    segments[segments.length - 1] += ".md";
+  }
+
+  return { segments, url: getDocsUrl(segments, page.locale) };
 }
