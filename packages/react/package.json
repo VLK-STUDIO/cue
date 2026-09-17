@@ -7,9 +7,12 @@
     "imperative",
     "modal",
     "overlay",
-    "react"
+    "overlays",
+    "programmatic",
+    "react",
+    "typescript"
   ],
-  "homepage": "https://github.com/VLK-STUDIO/cue#readme",
+  "homepage": "https://cue.vlkstudio.com",
   "bugs": {
     "url": "https://github.com/VLK-STUDIO/cue/issues"
   },

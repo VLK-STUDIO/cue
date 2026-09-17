@@ -2,8 +2,9 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import * as React from "react";
 import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
-import { appName } from "@/lib/shared";
+import { appName, siteDescription } from "@/lib/shared";
 import { cue } from "@/components/cue";
+import { jsonLdScript, siteGraph } from "@/lib/seo";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createRootRoute({
       },
       {
         name: "description",
-        content: "The simplest way to manage programmatic overlays in React.",
+        content: siteDescription,
       },
     ],
     links: [
@@ -29,13 +30,14 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
+    scripts: [jsonLdScript(siteGraph())],
   }),
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

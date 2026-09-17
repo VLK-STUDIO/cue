@@ -11,10 +11,11 @@ import {
   ViewOptionsPopover,
 } from "fumadocs-ui/layouts/docs/page";
 import { baseOptions } from "@/lib/layout.shared";
-import { encodeMarkdownUrl, gitConfig } from "@/lib/shared";
+import { encodeMarkdownUrl, getPageImageUrl, gitConfig } from "@/lib/shared";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense, use } from "react";
 import { useMDXComponents } from "@/components/mdx";
+import { docsArticleGraph, docsBreadcrumbs, jsonLdScript, pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/docs/$")({
   component: Page,
@@ -24,18 +25,34 @@ export const Route = createFileRoute("/docs/$")({
     await docs.getPage(data.path)?.preload();
     return data;
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          {
-            title: `${loaderData.title} | cue`,
-          },
-          ...(loaderData.description
-            ? [{ name: "description", content: loaderData.description }]
-            : []),
-        ]
-      : undefined,
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) return {};
+
+    const path = loaderData.urlPath;
+    const image = loaderData.imageUrl;
+    const seo = pageHead({
+      title: `${loaderData.title} | cue`,
+      description: loaderData.description ?? "Cue documentation",
+      path,
+      image,
+      type: "article",
+    });
+
+    return {
+      ...seo,
+      scripts: [
+        jsonLdScript(
+          docsArticleGraph({
+            title: loaderData.title,
+            description: loaderData.description ?? "Cue documentation",
+            path,
+            image,
+            breadcrumbs: docsBreadcrumbs(loaderData.slugs, loaderData.title),
+          }),
+        ),
+      ],
+    };
+  },
 });
 
 const serverLoader = createServerFn({
@@ -48,9 +65,12 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
+      slugs: page.slugs,
       title: page.data.title as string,
       description: page.data.description as string | undefined,
       markdownUrl: encodeMarkdownUrl(page.slugs, page.locale),
+      imageUrl: getPageImageUrl(page).url,
+      urlPath: page.url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

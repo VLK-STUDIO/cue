@@ -2,10 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { LogoMark } from "@/components/logo";
 import { baseOptions } from "@/lib/layout.shared";
-import { appName, githubUrl } from "@/lib/shared";
+import { appName, githubUrl, homeImageRoute, siteDescription } from "@/lib/shared";
 import { welcomeDialog } from "@/components/overlays";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
+  head: () =>
+    pageHead({
+      title: `${appName} · programmatic React overlays`,
+      description: siteDescription,
+      path: "/",
+      image: homeImageRoute,
+      type: "website",
+    }),
   component: Home,
 });
 
@@ -15,9 +24,7 @@ function Home() {
       <div className="om-landing">
         <LogoMark className="om-logo om-logo-hero" />
         <h1 className="om-landing-title">{appName}</h1>
-        <p className="om-landing-tagline">
-          The simplest way to manage programmatic overlays in React.
-        </p>
+        <p className="om-landing-tagline">{siteDescription}</p>
         <div className="om-landing-actions">
           <button
             type="button"
