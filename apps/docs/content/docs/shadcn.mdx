@@ -5,11 +5,19 @@ description: Install Cue with shadcn and let Cue own the shared backdrop.
 
 The `@vlkoss/cue` registry item installs shadcn's Dialog component and creates a local Cue module for your app. The namespace is `@vlkoss`; `cue` is the item name.
 
-<Tabs items={["Registry directory", "GitHub"]} groupId="shadcn-install" persist>
-  <Tab value="Registry directory">
+Once [shadcn/ui PR #11959](https://github.com/shadcn-ui/ui/pull/11959) is merged, the recommended install will be:
 
 ```npm
 npx shadcn@latest add @vlkoss/cue
+```
+
+Until then, install the same registry item directly:
+
+<Tabs items={["Direct URL", "GitHub"]} groupId="shadcn-install" persist>
+  <Tab value="Direct URL">
+
+```npm
+npx shadcn@latest add https://cue.vlkstudio.com/r/cue.json
 ```
 
   </Tab>
