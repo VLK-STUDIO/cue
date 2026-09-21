@@ -1,23 +1,25 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "cue",
+  "name": "vlkoss",
   "homepage": "https://cue.vlkstudio.com",
   "items": [
     {
       "name": "cue",
       "type": "registry:lib",
-      "title": "Cue",
-      "description": "Imperative React overlays with isolated Cue environments, typed shared components, and one shared backdrop.",
+      "title": "Cue for shadcn/ui",
+      "author": "VLK Studio",
+      "description": "Imperative React overlays for shadcn/ui. Create programmatic dialogs and modal flows with typed overlay handles, isolated Cue environments, stacked overlays, and one shared backdrop.",
       "dependencies": ["@vlkoss/cue"],
       "registryDependencies": ["dialog"],
       "files": [
         {
           "path": "registry/cue.tsx",
           "type": "registry:lib",
-          "target": "@/components/cue/index.tsx"
+          "target": "@components/cue/index.tsx"
         }
       ],
-      "docs": "Install a local Cue configuration with shadcn Dialog and create overlays with cue.createOverlay(...). The generated Cue module includes the native backdrop adapter and typed Dialog component map. Add showBackdrop={false} support to DialogContent as described in the docs. https://cue.vlkstudio.com/docs"
+      "categories": ["react", "overlay", "dialog", "modal", "imperative"],
+      "docs": "Install the shadcn Dialog component, add showBackdrop={false} support to DialogContent, and use the generated Cue environment for typed imperative overlays. https://cue.vlkstudio.com/docs/shadcn"
     }
   ]
 }
